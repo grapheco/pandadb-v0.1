@@ -1,2 +1,7 @@
 *.class
 *.log
+.idea/
+*.iml
+target/
+bin/
+testoutput/
