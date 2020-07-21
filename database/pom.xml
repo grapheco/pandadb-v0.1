@@ -24,7 +24,7 @@
         </dependency>
         <dependency>
             <groupId>pandadb</groupId>
-            <artifactId>ai-lib</artifactId>
+            <artifactId>semantic-ops</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <!--jersey should be import explicitly-->

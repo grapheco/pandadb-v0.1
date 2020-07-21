@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>pandadb</groupId>
-            <artifactId>ai-lib</artifactId>
+            <artifactId>semantic-ops</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.neo4j.test/neo4j-harness -->

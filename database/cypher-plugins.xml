@@ -8,43 +8,43 @@
             <list>
                 <bean class="cn.pandadb.database.cypherplus.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.panda.ailib.CommonPropertyExtractor"/>
+                        <bean class="cn.panda.semop.CommonPropertyExtractor"/>
                     </property>
                     <property name="domain" value="*"/>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.panda.ailib.text.ChineseTokenizer"/>
+                        <bean class="cn.panda.semop.text.ChineseTokenizer"/>
                     </property>
                     <property name="domain" value="string"/>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.panda.ailib.text.SentimentClassifier"/>
+                        <bean class="cn.panda.semop.text.SentimentClassifier"/>
                     </property>
                     <property name="domain" value="string"/>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.panda.ailib.CommonBlobPropertyExtractor"/>
+                        <bean class="cn.panda.semop.CommonBlobPropertyExtractor"/>
                     </property>
                     <property name="domain" value="blob/*"/>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.panda.ailib.image.ImageMetaDataExtractor"/>
+                        <bean class="cn.panda.semop.image.ImageMetaDataExtractor"/>
                     </property>
                     <property name="domain" value="blob/image"/>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.panda.ailib.image.PlateNumberExtractor"/>
+                        <bean class="cn.panda.semop.image.PlateNumberExtractor"/>
                     </property>
                     <property name="domain" value="blob/image"/>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.panda.ailib.image.DogOrCatClassifier"/>
+                        <bean class="cn.panda.semop.image.DogOrCatClassifier"/>
                     </property>
                     <property name="domain" value="blob/image"/>
                 </bean>
@@ -58,7 +58,7 @@
                     <property name="domain" value="blob/image:blob/image"/>
                     <property name="threshold" value="0.6"/>
                     <property name="comparator">
-                        <bean class="cn.panda.ailib.image.FaceSimilarityComparator"/>
+                        <bean class="cn.panda.semop.image.FaceSimilarityComparator"/>
                     </property>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainComparatorEntry">
@@ -66,7 +66,7 @@
                     <property name="domain" value="string:string"/>
                     <property name="threshold" value="0.7"/>
                     <property name="comparator">
-                        <bean class="cn.panda.ailib.text.JaroWinklerStringSimilarity"/>
+                        <bean class="cn.panda.semop.text.JaroWinklerStringSimilarity"/>
                     </property>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainComparatorEntry">
@@ -74,7 +74,7 @@
                     <property name="domain" value="string:string"/>
                     <property name="threshold" value="0.7"/>
                     <property name="comparator">
-                        <bean class="cn.panda.ailib.text.JaccardStringSimilarity"/>
+                        <bean class="cn.panda.semop.text.JaccardStringSimilarity"/>
                     </property>
                 </bean>
                 <bean class="cn.pandadb.database.cypherplus.DomainComparatorEntry">
@@ -82,7 +82,7 @@
                     <property name="domain" value="string:string"/>
                     <property name="threshold" value="0.7"/>
                     <property name="comparator">
-                        <bean class="cn.panda.ailib.text.CosineStringSimilarity"/>
+                        <bean class="cn.panda.semop.text.CosineStringSimilarity"/>
                     </property>
                 </bean>
             </list>
