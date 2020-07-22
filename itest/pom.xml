@@ -18,12 +18,12 @@
         </dependency>
         <dependency>
             <groupId>pandadb</groupId>
-            <artifactId>blob-storage</artifactId>
+            <artifactId>semops</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>pandadb</groupId>
-            <artifactId>semantic-ops</artifactId>
+            <artifactId>cypherplus</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.neo4j.test/neo4j-harness -->
@@ -41,5 +41,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>

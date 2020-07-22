@@ -18,9 +18,9 @@
 package org.neo4j.driver.v1;
 
 import cn.pandadb.commons.blob.Blob;
+import cn.pandadb.database.blob.NonBlobException;
 import org.neo4j.driver.internal.value.NullValue;
 import org.neo4j.driver.v1.exceptions.ClientException;
-import cn.pandadb.database.cypherplus.NonBlobException;
 import org.neo4j.driver.v1.exceptions.value.LossyCoercion;
 import org.neo4j.driver.v1.exceptions.value.Uncoercible;
 import org.neo4j.driver.v1.types.*;

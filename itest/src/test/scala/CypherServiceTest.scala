@@ -1,7 +1,7 @@
 import java.io.{File, FileInputStream}
 
 import cn.pandadb.commons.blob.Blob
-import cn.pandadb.database.{CypherService, PidbConnector}
+import cn.pandadb.database.{CypherService, PandaDB}
 import org.apache.commons.io.IOUtils
 import org.junit.{Assert, Before, Test}
 import org.neo4j.driver.v1.Record
@@ -107,8 +107,8 @@ class CypherServiceTest extends TestBase {
 
   @Test
   def testRemoteBoltServer(): Unit = {
-    val server = PidbConnector.startServer(new File("./testdb"), new File("./neo4j.conf"));
-    val client = PidbConnector.connect("bolt://localhost:7687");
+    val server = PandaDB.startServer(new File("./testdb"), new File("./neo4j.conf"));
+    val client = PandaDB.connect("bolt://localhost:7687");
 
     testCypher(client);
 
@@ -118,7 +118,7 @@ class CypherServiceTest extends TestBase {
   @Test
   def testLocalDB(): Unit = {
     val db = openDatabase();
-    testCypher(PidbConnector.connect(db));
+    testCypher(PandaDB.connect(db));
     db.shutdown();
   }
 }

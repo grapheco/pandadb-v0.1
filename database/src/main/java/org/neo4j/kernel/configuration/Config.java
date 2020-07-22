@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import cn.pandadb.database.blob.extensions.RuntimeContext;
+import cn.pandadb.commons.RuntimeContext;
 import org.neo4j.configuration.ConfigOptions;
 import org.neo4j.configuration.ConfigValue;
 import org.neo4j.configuration.LoadableConfig;

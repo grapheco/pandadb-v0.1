@@ -2,7 +2,7 @@ import java.io.{File, FileInputStream}
 import java.util
 
 import cn.pandadb.commons.blob.Blob
-import cn.pandadb.database.PidbConnector
+import cn.pandadb.database.PandaDB
 import cn.pandadb.commons.util.CodecUtils
 import org.apache.commons.io.FileUtils
 import org.junit.{Assert, Test}
@@ -60,6 +60,6 @@ class BlobFuncTest {
     db.shutdown();
   }
 
-  def openDatabase() = PidbConnector.openDatabase(new File("./testdb/data/databases/graph.db"),
-    new File("./neo4j.conf"));
+  def openDatabase() = PandaDB.openDatabase(new File("./testdb/data/databases/graph.db"),
+    new File("./testinput/neo4j.conf"));
 }

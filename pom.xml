@@ -9,12 +9,13 @@
     <version>0.1</version>
     <packaging>pom</packaging>
     <modules>
-        <module>semantic-ops</module>
+        <module>semops</module>
         <module>database</module>
         <module>commons</module>
-        <module>blob-storage</module>
+        <module>cypherplus</module>
         <module>itest</module>
-        <module>package</module>
+        <module>packaging</module>
+        <module>cypherplus</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

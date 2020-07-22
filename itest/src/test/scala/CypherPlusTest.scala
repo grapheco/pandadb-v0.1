@@ -1,6 +1,6 @@
 import java.io.File
 
-import cn.pandadb.database.PidbConnector
+import cn.pandadb.database.PandaDB
 import org.apache.commons.io.FileUtils
 import org.junit.{Assert, Test}
 
@@ -106,6 +106,6 @@ class CypherPlusTest {
     db.shutdown();
   }
 
-  def openDatabase() = PidbConnector.openDatabase(new File("./testdb/data/databases/graph.db"),
+  def openDatabase() = PandaDB.openDatabase(new File("./testdb/data/databases/graph.db"),
     new File("./neo4j.conf"));
 }

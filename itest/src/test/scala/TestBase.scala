@@ -1,12 +1,12 @@
 import java.io.{File, FileInputStream}
 
 import cn.pandadb.commons.blob.Blob
-import cn.pandadb.database.PidbConnector
+import cn.pandadb.database.PandaDB
 import org.apache.commons.io.{FileUtils, IOUtils}
 
 class TestBase {
   def setupNewDatabase(): Unit = {
-    FileUtils.deleteDirectory(new File("./testdb"));
+    FileUtils.deleteDirectory(new File("./testoutput/testdb"));
     //create a new database
     if (true) {
       val db = openDatabase();
@@ -35,6 +35,6 @@ class TestBase {
   }
 
   def openDatabase() =
-    PidbConnector.openDatabase(new File("./testdb/data/databases/graph.db"),
-      new File("./neo4j.conf"));
+    PandaDB.openDatabase(new File("./testoutput/testdb/data/databases/graph.db"),
+      new File("./testinput/neo4j.conf"));
 }

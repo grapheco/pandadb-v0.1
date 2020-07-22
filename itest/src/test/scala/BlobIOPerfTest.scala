@@ -1,7 +1,7 @@
 import java.io.File
 
 import cn.pandadb.commons.blob.Blob
-import cn.pandadb.database.PidbConnector
+import cn.pandadb.database.PandaDB
 import org.apache.commons.io.FileUtils
 
 object BlobIOPerfTest {
@@ -15,7 +15,7 @@ object BlobIOPerfTest {
 
     println(s"dir: $dir, conf: $conf, number: $n");
     FileUtils.deleteDirectory(new File(dir));
-    val db = PidbConnector.openDatabase(new File(dir), new File(conf));
+    val db = PandaDB.openDatabase(new File(dir), new File(conf));
 
     println("start inserting blobs...");
     val start = System.currentTimeMillis();

@@ -3,12 +3,12 @@ package cn.pandadb.database.blob
 import java.io.{ByteArrayOutputStream, File}
 
 import cn.pandadb.commons.blob._
-import cn.pandadb.commons.blob.storage.BlobStorage
+import cn.pandadb.commons.blob.BlobStorage
 import cn.pandadb.commons.util.ReflectUtils._
 import cn.pandadb.commons.util.StreamUtils._
 import cn.pandadb.commons.util.{Configuration, Logging, StreamUtils}
-import cn.pandadb.database.blob.extensions.RuntimeContext
-import cn.pandadb.database.{BlobCacheInSession, BoundTransactionState, ThreadBoundContext}
+import cn.pandadb.commons.RuntimeContext
+import cn.pandadb.database.{BlobCacheInSession, BlobPropertyStoreService, BoundTransactionState, ThreadBoundContext}
 import org.neo4j.driver.v1.Value
 import org.neo4j.kernel.api.{KernelTransaction, TransactionHook}
 import org.neo4j.kernel.configuration.Config
@@ -110,7 +110,7 @@ object BlobIO extends Logging {
       //write as a HTTP resource
       val config = ThreadBoundContext.conf;
       val httpConnectorUrl: String = config.asInstanceOf[RuntimeContext].contextGet("blob.server.connector.url").asInstanceOf[String];
-      val bpss = config.asInstanceOf[RuntimeContext].getBlobPropertyStoreService;
+      val bpss = config.asInstanceOf[RuntimeContext].contextGet[BlobPropertyStoreService];
       //http://localhost:1224/blob
       val bs = httpConnectorUrl.getBytes("utf-8");
       out.writeInt(bs.length);
@@ -282,7 +282,7 @@ object BlobIO extends Logging {
     //FIXME
     //val conf = ThreadBoundContext.transaction._conf;
     val (bid, length, mt) = _unpackBlob(values);
-    val storage: BlobStorage = ThreadBoundContext.conf.getBlobPropertyStoreService.blobStorage;
+    val storage: BlobStorage = ThreadBoundContext.conf.contextGet[BlobStorage];
     /*
     val blob = ThreadBoundContext.transaction._stateOption
       .flatMap(_.asInstanceOf[TxStateExtension].getBufferedBlob(bid))

@@ -2,15 +2,13 @@ package cn.pandadb.database
 
 import java.io._
 
+import cn.pandadb.commons.RuntimeContext
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import cn.pandadb.commons.blob._
-import cn.pandadb.commons.blob.storage.BlobStorage
-import cn.pandadb.database.blob.BlobIO._
+import cn.pandadb.commons.blob.BlobStorage
 import cn.pandadb.commons.util.ConfigurationUtils._
 import cn.pandadb.commons.util.{Configuration, Logging}
-import cn.pandadb.database.blob.DefaultBlobFunctions
-import cn.pandadb.database.blob.extensions.RuntimeContext
-import cn.pandadb.database.cypherplus.CypherPluginRegistry
+import cn.pandadb.database.blob.{BlobIO, DefaultBlobFunctions}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
@@ -30,7 +28,7 @@ class BlobPropertyStoreService(storeDir: File, conf: Config, proceduresService: 
   val blobIdFactory = BlobIdFactory.get
 
   conf.asInstanceOf[RuntimeContext].contextPut[BlobPropertyStoreService](this);
-  val configuration: Configuration = wrapNeo4jConf(conf);
+  val configuration: Configuration = BlobIO.wrapNeo4jConf(conf);
 
   val blobStorage: BlobStorage = BlobStorage.create(configuration);
 

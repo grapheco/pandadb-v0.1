@@ -16,15 +16,9 @@
             <artifactId>commons</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <!--pidb-blob-storage is required on runtime-->
         <dependency>
             <groupId>pandadb</groupId>
-            <artifactId>blob-storage</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>pandadb</groupId>
-            <artifactId>semantic-ops</artifactId>
+            <artifactId>cypherplus</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <!--jersey should be import explicitly-->
@@ -60,11 +54,7 @@
             <artifactId>neo4j</artifactId>
             <version>${neo4j.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-values</artifactId>
-            <version>${neo4j.version}</version>
-        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.neo4j.app/neo4j-server -->
         <dependency>
             <groupId>org.neo4j.app</groupId>

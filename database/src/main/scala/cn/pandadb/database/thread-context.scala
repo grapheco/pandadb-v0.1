@@ -1,10 +1,10 @@
 package cn.pandadb.database
 
-import cn.pandadb.commons.blob.storage.BlobStorage
+import cn.pandadb.commons.RuntimeContext
+import cn.pandadb.commons.blob.BlobStorage
 import cn.pandadb.commons.blob.{Blob, BlobId}
 import cn.pandadb.commons.util.Logging
 import cn.pandadb.commons.util.ReflectUtils._
-import cn.pandadb.database.blob.extensions.RuntimeContext
 import org.neo4j.kernel.api.KernelTransaction
 
 import scala.collection.mutable.ArrayBuffer
@@ -39,7 +39,7 @@ object ThreadBoundContext {
 trait BoundTransactionState {
   val conf: RuntimeContext;
 
-  lazy val blobPropertyStoreService: BlobPropertyStoreService = conf.getBlobPropertyStoreService;
+  lazy val blobPropertyStoreService: BlobPropertyStoreService = conf.contextGet[BlobPropertyStoreService];
 
   lazy val blobStorage: BlobStorage = blobPropertyStoreService.blobStorage;
 
