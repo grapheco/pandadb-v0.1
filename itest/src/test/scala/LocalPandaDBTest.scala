@@ -71,8 +71,12 @@ class LocalPandaDBTest extends TestBase {
     //cypher query
     val r1 = db2.execute("match (n) where n.name='bob' return n.photo,n.name,n.age,n.bytes,n.photo2").next();
     Assert.assertEquals("bob", r1.get("n.name"));
-    Assert.assertEquals(30, r1.get("n.age"));
-    Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/test.png"))), r1.get("n.bytes").asInstanceOf[Array[Byte]]);
+    Assert.assertEquals(30, r1.get("n.age"))
+
+    Assert.assertArrayEquals(
+      IOUtils.toByteArray(new FileInputStream(new File("./testinput/test.png"))),
+      r1.get("n.bytes").asInstanceOf[Array[Byte]])
+
     val blob22 = r1.get("n.photo2").asInstanceOf[Array[Blob]];
     Assert.assertEquals(2, blob22.length);
     Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/test.png"))),

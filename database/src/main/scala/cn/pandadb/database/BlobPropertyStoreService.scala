@@ -9,6 +9,7 @@ import cn.pandadb.commons.blob.BlobStorage
 import cn.pandadb.commons.util.ConfigurationUtils._
 import cn.pandadb.commons.util.{Configuration, Logging}
 import cn.pandadb.database.blob.{BlobIO, DefaultBlobFunctions}
+import cn.pandadb.query.{CustomPropertyProvider, ValueMatcher}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
@@ -18,48 +19,18 @@ import org.neo4j.kernel.lifecycle.Lifecycle
 import org.springframework.context.support.FileSystemXmlApplicationContext
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Created by bluejoe on 2018/11/29.
-  */
+ * Created by bluejoe on 2018/11/29.
+ */
 class BlobPropertyStoreService(storeDir: File, conf: Config, proceduresService: Procedures)
   extends Lifecycle with Logging {
   val runtimeContext: RuntimeContext = conf.asInstanceOf[RuntimeContext];
   val blobIdFactory = BlobIdFactory.get
-
+  val closables = ArrayBuffer[() => Unit]()
   conf.asInstanceOf[RuntimeContext].contextPut[BlobPropertyStoreService](this);
   val configuration: Configuration = BlobIO.wrapNeo4jConf(conf);
-
-  val blobStorage: BlobStorage = BlobStorage.create(configuration);
-
-  private var _blobServer: TransactionalBlobStreamServer = _;
-
-  val (valueMatcher, customPropertyProvider) = {
-    val cypherPluginRegistry = configuration.getRaw("blob.plugins.conf").map(x => {
-      val xml = new File(x);
-
-      val path =
-        if (xml.isAbsolute) {
-          xml.getPath
-        }
-        else {
-          val configFilePath = configuration.getRaw("config.file.path")
-          if (configFilePath.isDefined) {
-            new File(new File(configFilePath.get).getParentFile, x).getAbsoluteFile.getCanonicalPath
-          }
-          else {
-            xml.getAbsoluteFile.getCanonicalPath
-          }
-        }
-
-      logger.info(s"loading plugins: $path");
-      val appctx = new FileSystemXmlApplicationContext("file:" + path);
-      appctx.getBean[CypherPluginRegistry](classOf[CypherPluginRegistry]);
-    }).getOrElse(new CypherPluginRegistry());
-
-    (cypherPluginRegistry.createValueComparatorRegistry(configuration),
-      cypherPluginRegistry.createCustomPropertyProvider(configuration));
-  }
 
   override def shutdown(): Unit = {
   }
@@ -68,16 +39,42 @@ class BlobPropertyStoreService(storeDir: File, conf: Config, proceduresService: 
   }
 
   override def stop(): Unit = {
-    if (_blobServer != null) {
-      _blobServer.shutdown();
-    }
-
-    blobStorage.disconnect();
-    logger.info(s"blob storage shutdown: $blobStorage");
+    closables.foreach(_.apply())
+    logger.info(s"stopped BlobPropertyStoreService");
   }
 
-  private def startBlobServerIfNeeded(): Unit = {
-    _blobServer = if (!conf.enabledBoltConnectors().isEmpty) {
+  override def start(): Unit = {
+    val blobStorage: BlobStorage = BlobStorage.create(configuration);
+    blobStorage.initialize(storeDir, blobIdFactory, configuration);
+    closables += { () => blobStorage.disconnect() }
+    runtimeContext.contextPut[BlobStorage](blobStorage)
+
+    logger.info(s"instant blob storage initialized: ${blobStorage}")
+
+    val cypherPluginRegistry = configuration.getRaw("blob.plugins.conf").map(x => {
+      val path = new File(x) match {
+        case f: File if f.isAbsolute =>
+          f.getPath
+        case f: File =>
+          configuration.getRaw("config.file.path").map(m =>
+            new File(new File(m).getParentFile, x).getAbsoluteFile.getCanonicalPath).getOrElse(f.getCanonicalPath)
+      }
+
+      logger.info(s"loading plugins: $path");
+      val appctx = new FileSystemXmlApplicationContext("file:" + path);
+      appctx.getBean[CypherPluginRegistry](classOf[CypherPluginRegistry]);
+    }).getOrElse(new CypherPluginRegistry());
+
+    val valueMatcher = cypherPluginRegistry.createValueComparatorRegistry(configuration)
+    val customPropertyProvider = cypherPluginRegistry.createCustomPropertyProvider(configuration)
+    runtimeContext.contextPut[ValueMatcher](valueMatcher)
+    runtimeContext.contextPut[CustomPropertyProvider](customPropertyProvider)
+
+    //use getRuntimeContext[BlobPropertyStoreService]
+    //config.asInstanceOf[RuntimeContextHolder].putRuntimeContext[InstantBlobStorage](_instantStorage);
+    registerProcedure(classOf[DefaultBlobFunctions]);
+
+    if (!conf.enabledBoltConnectors().isEmpty) {
       val httpPort = configuration.getValueAsInt("blob.http.port", 1224);
       val servletPath = configuration.getValueAsString("blob.http.servletPath", "/blob");
       val blobServer = new TransactionalBlobStreamServer(this.conf, httpPort, servletPath);
@@ -87,21 +84,8 @@ class BlobPropertyStoreService(storeDir: File, conf: Config, proceduresService: 
 
       conf.asInstanceOf[RuntimeContext].contextPut("blob.server.connector.url", httpUrl);
       blobServer.start();
-      blobServer;
+      closables += { () => blobServer.shutdown() }
     }
-    else {
-      null;
-    }
-  }
-
-  override def start(): Unit = {
-    blobStorage.initialize(storeDir, blobIdFactory, configuration);
-    logger.info(s"instant blob storage initialized: ${blobStorage}");
-
-    //use getRuntimeContext[BlobPropertyStoreService]
-    //config.asInstanceOf[RuntimeContextHolder].putRuntimeContext[InstantBlobStorage](_instantStorage);
-    registerProcedure(classOf[DefaultBlobFunctions]);
-    startBlobServerIfNeeded();
   }
 
   private def registerProcedure(procedures: Class[_]*) {
@@ -113,6 +97,10 @@ class BlobPropertyStoreService(storeDir: File, conf: Config, proceduresService: 
 }
 
 class BlobCacheInSession(streamServer: TransactionalBlobStreamServer) extends Logging {
+  val CHECK_INTERVAL = 10000L;
+  val EXPIRATION = 600000L;
+  val cache = mutable.Map[String, (Blob, Long)]();
+
   def start() {
     new Thread(new Runnable {
       override def run() {
@@ -129,10 +117,6 @@ class BlobCacheInSession(streamServer: TransactionalBlobStreamServer) extends Lo
       }
     }).start();
   }
-
-  val CHECK_INTERVAL = 10000L;
-  val EXPIRATION = 600000L;
-  val cache = mutable.Map[String, (Blob, Long)]();
 
   def put(key: BlobId, blob: Blob): Unit = {
     val s = key.asLiteralString();

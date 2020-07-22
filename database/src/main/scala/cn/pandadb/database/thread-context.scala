@@ -39,9 +39,9 @@ object ThreadBoundContext {
 trait BoundTransactionState {
   val conf: RuntimeContext;
 
-  lazy val blobPropertyStoreService: BlobPropertyStoreService = conf.contextGet[BlobPropertyStoreService];
+  lazy val blobPropertyStoreService: BlobPropertyStoreService = conf.contextGet[BlobPropertyStoreService]
 
-  lazy val blobStorage: BlobStorage = blobPropertyStoreService.blobStorage;
+  lazy val blobStorage: BlobStorage = conf.contextGet[BlobStorage]
 
   lazy val blobBuffer: TransactionalBlobBuffer = new TransactionalBlobBufferImpl(blobStorage);
 
