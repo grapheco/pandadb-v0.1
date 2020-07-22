@@ -28,14 +28,14 @@ class BlobFuncTest {
     val node1 = db.createNode();
     node1.setProperty("name", "bob");
     //with a blob property
-    node1.setProperty("photo", Blob.fromFile(new File("./test.png")));
+    node1.setProperty("photo", Blob.fromFile(new File("./testinput/test.png")));
     db.execute("create (n: Person {name:'yahoo', photo: Blob.fromFile('./test2.jpg')})");
 
     val len2 = db.execute("return Blob.len(Blob.fromFile('./test.png')) as len").next().get("len").asInstanceOf[Long];
-    Assert.assertEquals(len2, new File("./test.png").length());
+    Assert.assertEquals(len2, new File("./testinput/test.png").length());
 
     val len = db.execute("match (n) where n.name='bob' return Blob.len(n.photo) as len").next().get("len").asInstanceOf[Long];
-    Assert.assertEquals(len, new File("./test.png").length());
+    Assert.assertEquals(len, new File("./testinput/test.png").length());
 
     val result: util.Map[String, AnyRef] = db.execute(
       """

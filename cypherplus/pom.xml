@@ -11,21 +11,21 @@
 
     <artifactId>cypherplus</artifactId>
 
-<dependencies>
-    <dependency>
-        <groupId>pandadb</groupId>
-        <artifactId>commons</artifactId>
-        <version>${project.parent.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.neo4j</groupId>
-        <artifactId>neo4j-values</artifactId>
-        <version>${neo4j.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.neo4j</groupId>
-        <artifactId>neo4j</artifactId>
-        <version>${neo4j.version}</version>
-    </dependency>
-</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>pandadb</groupId>
+            <artifactId>commons</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-values</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
+    </dependencies>
 </project>

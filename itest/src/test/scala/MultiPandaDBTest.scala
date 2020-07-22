@@ -52,10 +52,10 @@ class MultiPandaDBTest {
     val db3 = PandaDB.openDatabase(new File("./testdb2"),
       new File("./neo4j.conf"));
 
-    testCreateBlob(db2, new File("./test.png"))
-    testCreateBlob(db3, new File("./test1.png"))
-    testQuery(db2, new File("./test.png"))
-    testQuery(db3, new File("./test1.png"))
+    testCreateBlob(db2, new File("./testinput/test.png"))
+    testCreateBlob(db3, new File("./testinput/test1.png"))
+    testQuery(db2, new File("./testinput/test.png"))
+    testQuery(db3, new File("./testinput/test1.png"))
 
     db2.shutdown()
     db3.shutdown()
