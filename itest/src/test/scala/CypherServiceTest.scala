@@ -32,7 +32,7 @@ class CypherServiceTest extends TestBase {
 
     Assert.assertEquals(0, blob0.length);
 
-    val blob1 = client.querySingleObject("return Blob.fromFile('./test.png')", (result: Record) => {
+    val blob1 = client.querySingleObject("return Blob.fromFile('./testinput/test.png')", (result: Record) => {
       result.get(0).asBlob
     });
 
@@ -107,11 +107,9 @@ class CypherServiceTest extends TestBase {
 
   @Test
   def testRemoteBoltServer(): Unit = {
-    val server = PandaDB.startServer(new File("./testdb"), new File("./neo4j.conf"));
+    val server = PandaDB.startServer(new File("./testoutput/testdb"), new File("./neo4j.conf"));
     val client = PandaDB.connect("bolt://localhost:7687");
-
     testCypher(client);
-
     server.shutdown();
   }
 

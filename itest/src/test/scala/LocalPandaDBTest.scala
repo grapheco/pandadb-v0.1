@@ -99,7 +99,7 @@ class LocalPandaDBTest extends TestBase {
     val blob3 = db2.execute("match (n) where n.name='alex' return n.photo").next()
       .get("n.photo").asInstanceOf[Blob];
 
-    Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/test.png"))),
+    Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/test1.png"))),
       blob3.offerStream {
         IOUtils.toByteArray(_)
       });

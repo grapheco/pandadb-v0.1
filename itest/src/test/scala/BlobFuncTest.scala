@@ -10,7 +10,7 @@ import org.junit.{Assert, Test}
 class BlobFuncTest {
   @Test
   def test2(): Unit = {
-    FileUtils.deleteDirectory(new File("./testdb"));
+    FileUtils.deleteDirectory(new File("./testoutput/testdb"));
     //create a new database
     val db = openDatabase();
     val tx = db.beginTx();

@@ -7,7 +7,7 @@ import org.junit.{Assert, Test}
 class CypherPlusTest {
   @Test
   def testLike(): Unit = {
-    FileUtils.deleteDirectory(new File("./testdb"));
+    FileUtils.deleteDirectory(new File("./testoutput/testdb"));
     //create a new database
     val db = openDatabase();
     val tx = db.beginTx();
@@ -33,7 +33,7 @@ class CypherPlusTest {
 
   @Test
   def testCompare(): Unit = {
-    FileUtils.deleteDirectory(new File("./testdb"));
+    FileUtils.deleteDirectory(new File("./testoutput/testdb"));
     //create a new database
     val db = openDatabase();
     val tx = db.beginTx();
@@ -61,7 +61,7 @@ class CypherPlusTest {
 
   @Test
   def testCustomProperty(): Unit = {
-    FileUtils.deleteDirectory(new File("./testdb"));
+    FileUtils.deleteDirectory(new File("./testoutput/testdb"));
     //create a new database
     val db = openDatabase();
     val tx = db.beginTx();
