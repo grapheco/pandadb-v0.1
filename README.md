@@ -5,5 +5,5 @@ Intelligent Graph Database (import from GraiphDB https://github.com/grapheco/gra
 * intelligent property graph model
 * cypher plus
 
-# license
+# Licensing
 PandaDB v0.1 is an open source product licensed under GPLv3.
