@@ -12,17 +12,9 @@ class PlateNumberExtractorTest extends TestBase {
 
   @Test
   def test1():Unit={
-    var imagePath1 = "E:\\[pidb-ai-code]\\plate_number\\test4.jpg"
+    var imagePath1 = "testinput/plate_number1.jpg"
     val res = plateExtractor.extract(Blob.fromFile(new File(imagePath1)))
+    assert(res.get("plateNumber").isDefined && res.get("plateNumber").get.equals("苏E730V7"))
     print(res)
   }
-
-  @Test
-  def test2():Unit={
-    var imagePath1 = "E:/[face]/unknown/test.jpg"
-    val res = plateExtractor.extract(Blob.fromFile(new File(imagePath1)))
-    print(res)
-  }
-
-
 }

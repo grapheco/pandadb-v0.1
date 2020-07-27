@@ -13,7 +13,7 @@ class AnimalClassifierTest extends TestBase {
 
   @Test
   def test1():Unit={
-    var imagePath1 = "C:\\Users\\hai\\Desktop\\cat.1.jpg"
+    var imagePath1 = "testinput/cat1.jpg"
     val res = plateExtractor.extract(Blob.fromFile(new File(imagePath1)))
     print(res)
   }
