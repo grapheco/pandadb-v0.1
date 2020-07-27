@@ -1,10 +1,27 @@
-import java.io.File
+import java.io.{File, FileInputStream}
+import java.net.URL
 
+import cn.pandadb.commons.blob.Blob
 import cn.pandadb.database.PandaDB
-import org.apache.commons.io.FileUtils
+import org.apache.commons.io.{FileUtils, IOUtils}
 import org.junit.{Assert, Test}
 
-class CypherPlusTest {
+class CypherPlusTest extends TestBase {
+  @Test
+  def testBlobLiteral(): Unit = {
+    //create a new database
+    val db = openDatabase()
+
+    val blob1 = db.execute("return <https://www.baidu.com/img/flexible/logo/pc/result.png> as r").next().get("r").asInstanceOf[Blob];
+    Assert.assertArrayEquals(IOUtils.toByteArray(new URL("https://www.baidu.com/img/flexible/logo/pc/result.png")),
+      blob1.offerStream {
+        IOUtils.toByteArray(_)
+      })
+
+    Assert.assertTrue(blob1.length > 0)
+    db.shutdown()
+  }
+
   @Test
   def testLike(): Unit = {
     FileUtils.deleteDirectory(new File("./testoutput/testdb"));
@@ -43,7 +60,7 @@ class CypherPlusTest {
       Assert.assertTrue(false);
     }
     catch {
-      case _:Throwable => Assert.assertTrue(true);
+      case _: Throwable => Assert.assertTrue(true);
     }
 
     Assert.assertEquals(true, db.execute("return Blob.fromFile('/Users/bluejoe/Pictures/meng.jpg') :: Blob.fromFile('/Users/bluejoe/Pictures/event.jpg') as r").next().get("r").asInstanceOf[Double] > 0.7);
@@ -77,7 +94,7 @@ class CypherPlusTest {
       Assert.assertTrue(false);
     }
     catch {
-      case _:Throwable => Assert.assertTrue(true);
+      case _: Throwable => Assert.assertTrue(true);
     }
 
     Assert.assertEquals("image/jpeg", db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->mime as x""")
@@ -105,7 +122,4 @@ class CypherPlusTest {
     tx.close();
     db.shutdown();
   }
-
-  def openDatabase() = PandaDB.openDatabase(new File("./testdb/data/databases/graph.db"),
-    new File("./neo4j.conf"));
 }

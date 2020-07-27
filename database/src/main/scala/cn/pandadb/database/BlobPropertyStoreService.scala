@@ -9,7 +9,7 @@ import cn.pandadb.commons.blob.BlobStorage
 import cn.pandadb.commons.util.ConfigurationUtils._
 import cn.pandadb.commons.util.{Configuration, Logging}
 import cn.pandadb.database.blob.{BlobIO, DefaultBlobFunctions}
-import cn.pandadb.query.{CustomPropertyProvider, ValueMatcher}
+import cn.pandadb.query.{BlobFactory, CustomPropertyProvider, ValueMatcher}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
@@ -69,6 +69,9 @@ class BlobPropertyStoreService(storeDir: File, conf: Config, proceduresService: 
     val customPropertyProvider = cypherPluginRegistry.createCustomPropertyProvider(configuration)
     runtimeContext.contextPut[ValueMatcher](valueMatcher)
     runtimeContext.contextPut[CustomPropertyProvider](customPropertyProvider)
+
+    val blobFactory = new SimpleBlobFactory()
+    runtimeContext.contextPut[BlobFactory](blobFactory)
 
     //use getRuntimeContext[BlobPropertyStoreService]
     //config.asInstanceOf[RuntimeContextHolder].putRuntimeContext[InstantBlobStorage](_instantStorage);

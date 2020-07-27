@@ -7,11 +7,6 @@ import org.junit.{Assert, Before, Test}
 import org.neo4j.driver.v1.Record
 
 class CypherServiceTest extends TestBase {
-  @Before
-  def setup(): Unit = {
-    setupNewDatabase();
-  }
-
   private def testCypher(client: CypherService): Unit = {
     //a non-blob
     val (node, name, age, bytes) = client.querySingleObject("match (n) where n.name='bob' return n, n.name, n.age, n.bytes", (result: Record) => {

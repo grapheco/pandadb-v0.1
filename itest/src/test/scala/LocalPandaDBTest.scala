@@ -8,11 +8,6 @@ import org.neo4j.graphdb.Node
 import scala.collection.JavaConversions
 
 class LocalPandaDBTest extends TestBase {
-  @Before
-  def setup(): Unit = {
-    setupNewDatabase();
-  }
-
   @Test
   def testAPI(): Unit = {
     //reload database
