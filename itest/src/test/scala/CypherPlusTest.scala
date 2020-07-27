@@ -2,7 +2,6 @@ import java.io.{File, FileInputStream}
 import java.net.URL
 
 import cn.pandadb.commons.blob.Blob
-import cn.pandadb.database.PandaDB
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.junit.{Assert, Test}
 
@@ -19,6 +18,15 @@ class CypherPlusTest extends TestBase {
       })
 
     Assert.assertTrue(blob1.length > 0)
+
+    val basedir = new File("./testinput/ai").getCanonicalFile.getAbsolutePath
+    val blob2 = db.execute(s"return <file://${basedir}/bluejoe1.jpg> as r").next().get("r").asInstanceOf[Blob];
+    Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File(basedir, "bluejoe1.jpg"))),
+      blob2.offerStream {
+        IOUtils.toByteArray(_)
+      })
+
+    Assert.assertTrue(blob2.length > 0)
     db.shutdown()
   }
 
@@ -35,12 +43,12 @@ class CypherPlusTest extends TestBase {
 
     Assert.assertEquals(true, db.execute("return Blob.empty() ~: Blob.empty() as r").next().get("r").asInstanceOf[Boolean]);
 
+    val basedir = new File("./testinput/ai").getCanonicalFile.getAbsolutePath
     Assert.assertEquals(true, db.execute(
-      """return Blob.fromFile('/Users/bluejoe/Pictures/similarity_test_1.png')
-      ~: Blob.fromFile('/Users/bluejoe/Pictures/similarity_test_2.png') as r""")
+      s"return <file://${basedir}/bluejoe1.jpg> ~: <file://${basedir}/bluejoe2.jpg> as r")
       .next().get("r").asInstanceOf[Boolean]);
 
-    Assert.assertEquals(true, db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg') ~: '.*NB666.*' as r""")
+    Assert.assertEquals(true, db.execute(s"<file://${basedir}/car1.jpg> ~: '.*730V7' as r")
       .next().get("r").asInstanceOf[Boolean]);
 
     tx.success();
@@ -60,19 +68,32 @@ class CypherPlusTest extends TestBase {
       Assert.assertTrue(false);
     }
     catch {
-      case _: Throwable => Assert.assertTrue(true);
+      case t: Throwable =>
+        t.printStackTrace()
+        tx.failure()
+        Assert.assertTrue(true);
     }
 
-    Assert.assertEquals(true, db.execute("return Blob.fromFile('/Users/bluejoe/Pictures/meng.jpg') :: Blob.fromFile('/Users/bluejoe/Pictures/event.jpg') as r").next().get("r").asInstanceOf[Double] > 0.7);
-    Assert.assertEquals(true, db.execute("return Blob.fromFile('/Users/bluejoe/Pictures/simba.jpg') :: Blob.fromFile('/Users/bluejoe/Pictures/simba2.jpg') as r").next().get("r").asInstanceOf[Double] > 0.9);
-    Assert.assertEquals(0.9, db.execute("return '杜 一' :: '杜一' as r").next().get("r"));
-    Assert.assertEquals(0.9, db.execute("return '杜 一' ::jaro '杜一' as r").next().get("r"));
-    Assert.assertEquals(0.75, db.execute("return 'Yi Du' :: 'DU Yi' as r").next().get("r"));
+    val tx2 = db.beginTx();
 
-    db.execute("return '杜 一' ::jaro '杜一','Zhihong SHEN' ::levenshtein 'SHEN Z.H'");
+    println(db.execute("return '沈志宏' :: '志宏 沈' as r").resultAsString())
+    println(db.execute("return '沈志宏' ::jaro '志宏 沈' as r").resultAsString())
+    println(db.execute("return '沈志宏' ::jaccard '志宏 沈' as r").resultAsString())
+    println(db.execute("return '沈志宏' ::cosine '志宏 沈' as r").resultAsString())
 
-    tx.success();
-    tx.close();
+    println(db.execute("return '沈志宏' ~: '志宏 沈' as r").resultAsString())
+    println(db.execute("return '沈志宏' ~:jaro/0.7 '志宏 沈' as r").resultAsString())
+    println(db.execute("return '沈志宏' ~:jaro/0.8 '志宏 沈' as r").resultAsString())
+
+    Assert.assertTrue(db.execute("return '沈志宏' :: '志宏 沈' as r").next().get("r").asInstanceOf[Double] > 0.7);
+    Assert.assertTrue(db.execute("return '沈志宏' :: '志宏 沈' as r").next().get("r").asInstanceOf[Double] < 0.8);
+    Assert.assertTrue(db.execute("return '沈志宏' ::jaro '志宏 沈' as r").next().get("r").asInstanceOf[Double] > 0.7);
+    Assert.assertEquals(true, db.execute("return '沈志宏' ~: '志宏 沈' as r").next().get("r"));
+    Assert.assertEquals(true, db.execute("return '沈志宏' ~:jaro/0.7 '志宏 沈' as r").next().get("r"));
+    Assert.assertEquals(false, db.execute("return '沈志宏' ~:jaro/0.8 '志宏 沈' as r").next().get("r"));
+
+    tx2.success();
+    tx2.close();
     db.shutdown();
   }
 
@@ -85,37 +106,33 @@ class CypherPlusTest extends TestBase {
     /*
     Some(Query(None,SingleQuery(List(Return(false,ReturnItems(false,List(AliasedReturnItem(Property(FunctionInvocation(Namespace(List(Blob)),FunctionName(fromFile),false,Vector(StringLiteral(/Users/bluejoe/Pictures/test.wav))),PropertyKeyName(x)),Variable(x)))),None,None,None,None,Set())))))
     */
-    Assert.assertEquals(new File("/Users/bluejoe/Pictures/1.jpeg").length(),
-      db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->length as x""")
+    val basedir = new File("./testinput/ai").getCanonicalFile.getAbsolutePath
+
+    Assert.assertEquals(new File(basedir, "bluejoe1.jpg").length(),
+      db.execute(s"return <file://${basedir}/bluejoe1.jpg> ->length as x")
         .next().get("x"));
 
     try {
-      db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->notExist""");
+      db.execute("""return <file://${basedir}/bluejoe1.jpg>->notExist""");
       Assert.assertTrue(false);
     }
     catch {
       case _: Throwable => Assert.assertTrue(true);
     }
 
-    Assert.assertEquals("image/jpeg", db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->mime as x""")
+    Assert.assertEquals("image/jpeg", db.execute(s"return <file://${basedir}/bluejoe1.jpg>->mime as x")
       .next().get("x"));
 
-    Assert.assertEquals(1, db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->test1 as x""")
+    Assert.assertEquals(3968, db.execute(s"return <file://${basedir}/bluejoe1.jpg>->width as x")
       .next().get("x"));
 
-    Assert.assertEquals("hello", db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->test2 as x""")
+    Assert.assertEquals(2976, db.execute(s"return <file://${basedir}/bluejoe1.jpg>->height as x")
       .next().get("x"));
 
-    Assert.assertEquals(500, db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->width as x""")
-      .next().get("x"));
-
-    Assert.assertEquals(635, db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->height as x""")
-      .next().get("x"));
-
-    Assert.assertEquals(true, db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/1.jpeg')->plateNumber = '京NB6666' as r""")
+    Assert.assertEquals(true, db.execute(s"return <file://${basedir}/bluejoe1.jpg>->plateNumber = '京NB6666' as r")
       .next().get("r").asInstanceOf[Boolean]);
 
-    Assert.assertEquals(true, db.execute("""return Blob.fromFile('/Users/bluejoe/Pictures/test.wav')->message = '中华人民共和国' as r""")
+    Assert.assertEquals(true, db.execute(s"return <file://${basedir}/test.wav>->message = '中华人民共和国' as r")
       .next().get("r").asInstanceOf[Boolean]);
 
     tx.success();
