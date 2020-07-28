@@ -1,7 +1,7 @@
 import java.io.{File, FileInputStream}
 import java.net.URL
 
-import cn.pandadb.commons.blob.Blob
+import org.neo4j.blob.Blob
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.junit.{Assert, Test}
 

@@ -1,9 +1,8 @@
 package cn.pandadb.database
 
-import cn.pandadb.commons.blob._
 import cn.pandadb.commons.semop.{PropertyValueComparator, SingleValueComparator, SubPropertyExtractor, ValueSetComparator}
-import cn.pandadb.commons.util.{Configuration, Logging}
-import cn.pandadb.query.{CustomPropertyProvider, ValueMatcher}
+import org.neo4j.blob.utils.{Configuration, Logging}
+import org.neo4j.blob.Blob
 
 import scala.beans.BeanProperty
 import scala.collection.mutable
@@ -11,7 +10,27 @@ import scala.collection.mutable
 /**
   * Created by bluejoe on 2019/1/31.
   */
+trait CustomPropertyProvider {
+  def getCustomProperty(x: Any, propertyName: String): Option[Any];
+}
 
+trait ValueMatcher {
+  def like(a: Any, b: Any, algoName: Option[String], threshold: Option[Double]): Option[Boolean];
+
+  def containsOne(a: Any, b: Any, algoName: Option[String], threshold: Option[Double]): Option[Boolean];
+
+  def containsSet(a: Any, b: Any, algoName: Option[String], threshold: Option[Double]): Option[Boolean];
+
+  /**
+    * compares two values
+    */
+  def compareOne(a: Any, b: Any, algoName: Option[String]): Option[Double];
+
+  /**
+    * compares two objects as sets
+    */
+  def compareSet(a: Any, b: Any, algoName: Option[String]): Option[Array[Array[Double]]];
+}
 
 object ValueType {
   def typeNameOf(x: Any): String = x match {

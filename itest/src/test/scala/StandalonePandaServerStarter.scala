@@ -1,12 +1,13 @@
 import java.io.File
 
 import cn.pandadb.database.PandaDB
+import cn.pandadb.server.PandaServer
 import org.apache.commons.io.FileUtils
 
 object StandalonePandaServerStarter {
   def main(args: Array[String]) {
     //NOTE: setting working dir to ./itest in IDEA
-    //new TestBase().setupNewDatabase();
-    PandaDB.startServer(new File("./testoutput/testdb"), new File("./neo4j.conf"));
+    new TestBase().setup();
+    PandaServer.start(new File("./testoutput/testdb"), new File("./testinput/neo4j.conf"));
   }
 }

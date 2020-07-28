@@ -1,10 +1,12 @@
 import java.io.{File, FileInputStream}
 
-import cn.pandadb.commons.blob.Blob
-import cn.pandadb.database.{CypherService, PandaDB}
+import org.neo4j.blob.Blob
+import cn.pandadb.database.{LocalGraphService, PandaDB}
+import cn.pandadb.connector.{CypherService, RemotePandaServer}
+import cn.pandadb.server.PandaServer
 import org.apache.commons.io.IOUtils
-import org.junit.{Assert, Before, Test}
-import org.neo4j.driver.v1.Record
+import org.junit.{Assert, Test}
+import org.neo4j.driver.Record
 
 class CypherServiceTest extends TestBase {
   private def testCypher(client: CypherService): Unit = {
@@ -102,8 +104,8 @@ class CypherServiceTest extends TestBase {
 
   @Test
   def testRemoteBoltServer(): Unit = {
-    val server = PandaDB.startServer(new File("./testoutput/testdb"), new File("./neo4j.conf"));
-    val client = PandaDB.connect("bolt://localhost:7687");
+    val server = PandaServer.start(new File("./testoutput/testdb"), new File("./neo4j.conf"));
+    val client = RemotePandaServer.connect("bolt://localhost:7687");
     testCypher(client);
     server.shutdown();
   }
@@ -111,7 +113,7 @@ class CypherServiceTest extends TestBase {
   @Test
   def testLocalDB(): Unit = {
     val db = openDatabase();
-    testCypher(PandaDB.connect(db));
+    testCypher(LocalGraphService.connect(db));
     db.shutdown();
   }
 }

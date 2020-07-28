@@ -9,50 +9,181 @@
     <version>0.1</version>
     <packaging>pom</packaging>
     <modules>
-        <module>semops</module>
+        <module>oplib</module>
         <module>database</module>
-        <module>commons</module>
-        <module>cypherplus</module>
         <module>itest</module>
         <module>packaging</module>
-        <module>cypherplus</module>
+        <module>commons</module>
+        <module>server</module>
+        <module>connector</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compile.version>1.8</compile.version>
         <jetty.version>9.4.8.v20171121</jetty.version>
-        <neo4j.version>3.4.0</neo4j.version>
+        <neo4j.version>3.5.6-BLOB</neo4j.version>
         <hbase.version>2.0.2</hbase.version>
         <hadoop.version>2.7.7</hadoop.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.neo4j.driver</groupId>
+                <artifactId>neo4j-java-driver</artifactId>
+                <version>2.0.1-graiph</version>
+            </dependency>
+            <!--jersey should be import explicitly-->
+            <!--because springframework & neo4j use different versions-->
+            <dependency>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-json</artifactId>
+                <version>1.13</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-servlet</artifactId>
+                <version>1.13</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>4.0.0.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.9.10</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5.7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpmime</artifactId>
+                <version>4.5.7</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sf.jmimemagic</groupId>
+                <artifactId>jmimemagic</artifactId>
+                <version>0.1.5</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.neo4j/neo4j -->
+            <dependency>
+                <groupId>org.neo4j</groupId>
+                <artifactId>neo4j</artifactId>
+                <version>${neo4j.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.neo4j.app/neo4j-server -->
+            <dependency>
+                <groupId>org.neo4j.app</groupId>
+                <artifactId>neo4j-server</artifactId>
+                <version>${neo4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.neo4j</groupId>
+                <artifactId>neo4j-bolt</artifactId>
+                <version>${neo4j.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.neo4j.driver/neo4j-java-driver -->
+            <dependency>
+                <groupId>org.neo4j.driver</groupId>
+                <artifactId>neo4j-java-driver</artifactId>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.neo4j/neo4j-csv -->
+            <dependency>
+                <groupId>org.neo4j</groupId>
+                <artifactId>neo4j-csv</artifactId>
+                <version>${neo4j.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.neo4j/neo4j-import-tool -->
+            <dependency>
+                <groupId>org.neo4j</groupId>
+                <artifactId>neo4j-import-tool</artifactId>
+                <version>${neo4j.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.11</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/log4j/log4j -->
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>1.2.12</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.10</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>3.0.0</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-jaxrs -->
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-jaxrs</artifactId>
+                <version>1.9.13</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.scala-lang.modules/scala-parser-combinators -->
+            <dependency>
+                <groupId>org.scala-lang.modules</groupId>
+                <artifactId>scala-parser-combinators_2.11</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo</artifactId>
+                <version>3.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>org.grapheco</groupId>
+            <artifactId>graiph-blob-commons</artifactId>
+            <version>0.1.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
             <scope>test</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.11</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/log4j/log4j -->
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.12</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

@@ -26,16 +26,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import cn.pandadb.commons.blob.Blob;
-import cn.pandadb.database.blob.DefaultBlobFunctions;
-
+import org.neo4j.blob.Blob;
+import org.neo4j.blob.Blob$;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.*;
 
 import static java.lang.Character.isWhitespace;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.time.ZoneOffset.UTC;
-import static org.neo4j.collection.primitive.PrimitiveLongCollections.EMPTY_LONG_ARRAY;
+import static org.neo4j.collection.PrimitiveLongCollections.EMPTY_LONG_ARRAY;
 import static org.neo4j.helpers.Numbers.safeCastLongToByte;
 import static org.neo4j.helpers.Numbers.safeCastLongToInt;
 import static org.neo4j.helpers.Numbers.safeCastLongToShort;
@@ -102,7 +101,7 @@ public class Extractors
     private final LocalTimeExtractor localTime;
     private final LocalDateTimeExtractor localDateTime;
     private final DurationExtractor duration;
-    private final BlobExtractor blob;
+    private final BlobExtractor blob; //<--pandadb-->
 
     public Extractors( char arrayDelimiter )
     {
@@ -165,7 +164,7 @@ public class Extractors
             add( localTime = new LocalTimeExtractor() );
             add( localDateTime = new LocalDateTimeExtractor() );
             add( duration = new DurationExtractor() );
-            add( blob = new BlobExtractor() );
+            add( blob = new BlobExtractor() ); //<--pandadb-->
         }
         catch ( IllegalAccessException e )
         {
@@ -308,11 +307,6 @@ public class Extractors
         return duration;
     }
 
-    public BlobExtractor blob()
-    {
-        return blob;
-    }
-
     private abstract static class AbstractExtractor<T> implements Extractor<T>
     {
         private final String name;
@@ -399,6 +393,35 @@ public class Extractors
             return value;
         }
     }
+
+    //<--pandadb
+    public static class BlobExtractor extends AbstractSingleAnyValueExtractor
+    {
+        BlobValue value;
+
+        BlobExtractor()
+        {
+            super( NAME );
+        }
+
+        @Override
+        protected boolean extract0( char[] data, int offset, int length, CSVHeaderInformation optionalData )
+        {
+            String tmpStr = new String( data, offset, length );
+            Blob blob = Blob$.MODULE$.fromURL(tmpStr);
+            value = new BlobValue(blob);
+            return true;
+        }
+
+        @Override
+        public BlobValue value()
+        {
+            return value;
+        }
+
+        public static final String NAME = "Blob";
+    }
+    //pandadb-->
 
     public static class StringExtractor extends AbstractSingleValueExtractor<String>
     {
@@ -1181,34 +1204,6 @@ public class Extractors
         }
 
         public static final String NAME = "Duration";
-    }
-
-    public static class BlobExtractor extends AbstractSingleAnyValueExtractor
-    {
-        BlobValue value;
-
-        BlobExtractor()
-        {
-            super( NAME );
-        }
-
-        @Override
-        protected boolean extract0( char[] data, int offset, int length, CSVHeaderInformation optionalData )
-        {
-            String tmpStr = new String( data, offset, length );
-            DefaultBlobFunctions bf = new DefaultBlobFunctions();
-            Blob blob = bf.fromURL(tmpStr);
-            value = new BlobValue(blob);
-            return true;
-        }
-
-        @Override
-        public BlobValue value()
-        {
-            return value;
-        }
-
-        public static final String NAME = "Blob";
     }
 
     private static final Supplier<ZoneId> inUTC = () -> UTC;

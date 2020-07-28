@@ -1,6 +1,6 @@
 import java.io.File
 
-import cn.pandadb.commons.blob.Blob
+import org.neo4j.blob.Blob
 import cn.pandadb.database.PandaDB
 import org.apache.commons.io.FileUtils
 

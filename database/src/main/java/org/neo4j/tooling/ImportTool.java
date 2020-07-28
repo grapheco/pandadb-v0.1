@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2018 "Neo4j,"
+ * Copyright (c) 2002-2019 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import cn.pandadb.database.blob.BlobIO;
+import cn.pandadb.database.BlobBatchImportSession;
+import cn.pandadb.database.BlobBatchImportSession$;
 import org.neo4j.csv.reader.IllegalMultilineFieldException;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.helpers.Args;
@@ -44,23 +46,23 @@ import org.neo4j.helpers.ArrayUtil;
 import org.neo4j.helpers.Exceptions;
 import org.neo4j.helpers.Strings;
 import org.neo4j.helpers.collection.IterableWrapper;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.io.IOUtils;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.fs.FileUtils;
+import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.os.OsBeanUtil;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.configuration.Settings;
-import org.neo4j.kernel.impl.logging.LogService;
-import org.neo4j.kernel.impl.logging.StoreLogService;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.util.Converters;
-import org.neo4j.kernel.impl.scheduler.CentralJobScheduler;
 import org.neo4j.kernel.impl.util.Validator;
 import org.neo4j.kernel.impl.util.Validators;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.kernel.lifecycle.LifeSupport;
+import org.neo4j.logging.internal.LogService;
+import org.neo4j.logging.internal.StoreLogService;
+import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.unsafe.impl.batchimport.BatchImporter;
 import org.neo4j.unsafe.impl.batchimport.BatchImporterFactory;
 import org.neo4j.unsafe.impl.batchimport.cache.idmapping.string.DuplicateInputIdException;
@@ -90,6 +92,7 @@ import static org.neo4j.helpers.TextUtil.tokenizeStringWithQuotes;
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.io.fs.FileUtils.readTextFile;
 import static org.neo4j.kernel.configuration.Settings.parseLongWithUnit;
+import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 import static org.neo4j.kernel.impl.store.PropertyType.EMPTY_BYTE_ARRAY;
 import static org.neo4j.kernel.impl.util.Converters.withDefault;
 import static org.neo4j.unsafe.impl.batchimport.AdditionalInitialIds.EMPTY;
@@ -116,14 +119,14 @@ public class ImportTool
 {
     private static final String INPUT_FILES_DESCRIPTION =
             "Multiple files will be logically seen as one big file " +
-            "from the perspective of the importer. " +
-            "The first line must contain the header. " +
-            "Multiple data sources like these can be specified in one import, " +
-            "where each data source has its own header. " +
-            "Note that file groups must be enclosed in quotation marks. " +
-            "Each file can be a regular expression and will then include all matching files. " +
-            "The file matching is done with number awareness such that e.g. files:" +
-            "'File1Part_001.csv', 'File12Part_003' will be ordered in that order for a pattern like: 'File.*'";
+                    "from the perspective of the importer. " +
+                    "The first line must contain the header. " +
+                    "Multiple data sources like these can be specified in one import, " +
+                    "where each data source has its own header. " +
+                    "Note that file groups must be enclosed in quotation marks. " +
+                    "Each file can be a regular expression and will then include all matching files. " +
+                    "The file matching is done with number awareness such that e.g. files:" +
+                    "'File1Part_001.csv', 'File12Part_003' will be ordered in that order for a pattern like: 'File.*'";
 
     private static final String UNLIMITED = "true";
 
@@ -144,12 +147,12 @@ public class ImportTool
         NODE_DATA( "nodes", null,
                 "[:Label1:Label2] \"<file1>" + MULTI_FILE_DELIMITER + "<file2>" + MULTI_FILE_DELIMITER + "...\"",
                 "Node CSV header and data. " + INPUT_FILES_DESCRIPTION,
-                        true, true ),
+                true, true ),
         RELATIONSHIP_DATA( "relationships", null,
                 "[:RELATIONSHIP_TYPE] \"<file1>" + MULTI_FILE_DELIMITER + "<file2>" +
-                MULTI_FILE_DELIMITER + "...\"",
+                        MULTI_FILE_DELIMITER + "...\"",
                 "Relationship CSV header and data. " + INPUT_FILES_DESCRIPTION,
-                        true, true ),
+                true, true ),
         DELIMITER( "delimiter", null,
                 "<delimiter-character>",
                 "Delimiter character, or 'TAB', between values in CSV data. The default option is `" + COMMAS.delimiter() + "`." ),
@@ -205,7 +208,7 @@ public class ImportTool
         BAD_TOLERANCE( "bad-tolerance", 1000,
                 "<max number of bad entries, or " + UNLIMITED + " for unlimited>",
                 "Number of bad entries before the import is considered failed. This tolerance threshold is "
-                        + "about relationships refering to missing nodes. Format errors in input data are "
+                        + "about relationships referring to missing nodes. Format errors in input data are "
                         + "still treated as errors" ),
         SKIP_BAD_ENTRIES_LOGGING( "skip-bad-entries-logging", Boolean.FALSE, "<true/false>",
                 "Whether or not to skip logging bad entries detected during import." ),
@@ -215,7 +218,7 @@ public class ImportTool
                         + "start or end node id/group referring to node that wasn't specified by the "
                         + "node input data. "
                         + "Skipped nodes will be logged"
-                        + ", containing at most number of entites specified by " + BAD_TOLERANCE.key() + ", unless "
+                        + ", containing at most number of entities specified by " + BAD_TOLERANCE.key() + ", unless "
                         + "otherwise specified by " + SKIP_BAD_ENTRIES_LOGGING.key() + " option." ),
         SKIP_DUPLICATE_NODES( "skip-duplicate-nodes", Boolean.FALSE,
                 "<true/false>",
@@ -248,23 +251,23 @@ public class ImportTool
         READ_BUFFER_SIZE( "read-buffer-size", org.neo4j.csv.reader.Configuration.DEFAULT.bufferSize(),
                 "<bytes, e.g. 10k, 4M>",
                 "Size of each buffer for reading input data. It has to at least be large enough to hold the " +
-                "biggest single value in the input data." ),
+                        "biggest single value in the input data." ),
         MAX_MEMORY( "max-memory", null,
                 "<max memory that importer can use>",
                 "(advanced) Maximum memory that importer can use for various data structures and caching " +
-                "to improve performance. If left as unspecified (null) it is set to " + DEFAULT_MAX_MEMORY_PERCENT +
-                "% of (free memory on machine - max JVM memory). " +
-                "Values can be plain numbers, like 10000000 or e.g. 20G for 20 gigabyte, or even e.g. 70%." ),
+                        "to improve performance. If left as unspecified (null) it is set to " + DEFAULT_MAX_MEMORY_PERCENT +
+                        "% of (free memory on machine - max JVM memory). " +
+                        "Values can be plain numbers, like 10000000 or e.g. 20G for 20 gigabyte, or even e.g. 70%." ),
         CACHE_ON_HEAP( "cache-on-heap",
                 DEFAULT.allowCacheAllocationOnHeap(),
                 "Whether or not to allow allocating memory for the cache on heap",
                 "(advanced) Whether or not to allow allocating memory for the cache on heap. " +
-                "If 'false' then caches will still be allocated off-heap, but the additional free memory " +
-                "inside the JVM will not be allocated for the caches. This to be able to have better control " +
-                "over the heap memory" ),
+                        "If 'false' then caches will still be allocated off-heap, but the additional free memory " +
+                        "inside the JVM will not be allocated for the caches. This to be able to have better control " +
+                        "over the heap memory" ),
         HIGH_IO( "high-io", null, "Assume a high-throughput storage subsystem",
                 "(advanced) Ignore environment-based heuristics, and assume that the target storage subsystem can " +
-                "support parallel IO with high throughput." ),
+                        "support parallel IO with high throughput." ),
         DETAILED_PROGRESS( "detailed-progress", false, "true/false", "Use the old detailed 'spectrum' progress printing" );
 
         private final String key;
@@ -481,7 +484,7 @@ public class ImportTool
             in = defaultSettingsSuitableForTests ? new ByteArrayInputStream( EMPTY_BYTE_ARRAY ) : System.in;
             boolean detailedPrinting = args.getBoolean( Options.DETAILED_PROGRESS.key(), (Boolean) Options.DETAILED_PROGRESS.defaultValue() );
 
-            doImport( out, err, in, storeDir, logsDir, badFile, fs, nodesFiles, relationshipsFiles,
+            doImport( out, err, in, DatabaseLayout.of( storeDir ), logsDir, badFile, fs, nodesFiles, relationshipsFiles,
                     enableStacktrace, input, dbConfig, badOutput, configuration, detailedPrinting );
 
             success = true;
@@ -490,7 +493,7 @@ public class ImportTool
         {
             throw andPrintError( "Input error", e, false, err );
         }
-        catch ( IOException e )
+        catch ( IOException | UncheckedIOException e )
         {
             throw andPrintError( "File error", e, false, err );
         }
@@ -524,7 +527,7 @@ public class ImportTool
     public static String[] parseFileArgumentList( File file ) throws IOException
     {
         List<String> arguments = new ArrayList<>();
-        readTextFile( file, line -> arguments.addAll( asList( tokenizeStringWithQuotes( line, true, true ) ) ) );
+        readTextFile( file, line -> arguments.addAll( asList( tokenizeStringWithQuotes( line, true, true, false ) ) ) );
         return arguments.toArray( new String[arguments.size()] );
     }
 
@@ -550,7 +553,7 @@ public class ImportTool
         return null;
     }
 
-    public static void doImport( PrintStream out, PrintStream err, InputStream in, File storeDir, File logsDir, File badFile,
+    public static void doImport( PrintStream out, PrintStream err, InputStream in, DatabaseLayout databaseLayout, File logsDir, File badFile,
                                  FileSystemAbstraction fs, Collection<Option<File[]>> nodesFiles,
                                  Collection<Option<File[]>> relationshipsFiles, boolean enableStacktrace, Input input,
                                  Config dbConfig, OutputStream badOutput,
@@ -562,13 +565,13 @@ public class ImportTool
         dbConfig.augment( logs_directory, logsDir.getCanonicalPath() );
         File internalLogFile = dbConfig.get( store_internal_log_path );
         LogService logService = life.add( StoreLogService.withInternalLog( internalLogFile ).build( fs ) );
-        final CentralJobScheduler jobScheduler = life.add( new CentralJobScheduler() );
+        final JobScheduler jobScheduler = life.add( createScheduler() );
 
         life.start();
         ExecutionMonitor executionMonitor = detailedProgress
-                        ? new SpectrumExecutionMonitor( 2, TimeUnit.SECONDS, out, SpectrumExecutionMonitor.DEFAULT_WIDTH )
-                        : ExecutionMonitors.defaultVisible( in, jobScheduler );
-        BatchImporter importer = BatchImporterFactory.withHighestPriority().instantiate( storeDir,
+                ? new SpectrumExecutionMonitor( 2, TimeUnit.SECONDS, out, SpectrumExecutionMonitor.DEFAULT_WIDTH )
+                : ExecutionMonitors.defaultVisible( in, jobScheduler );
+        BatchImporter importer = BatchImporterFactory.withHighestPriority().instantiate( databaseLayout,
                 fs,
                 null, // no external page cache
                 configuration,
@@ -576,19 +579,17 @@ public class ImportTool
                 EMPTY,
                 dbConfig,
                 RecordFormatSelector.selectForConfig( dbConfig, logService.getInternalLogProvider() ),
-                new PrintingImportLogicMonitor( out, err ) );
-        printOverview( storeDir, nodesFiles, relationshipsFiles, configuration, out );
+                new PrintingImportLogicMonitor( out, err ), jobScheduler );
+        printOverview( databaseLayout.databaseDirectory(), nodesFiles, relationshipsFiles, configuration, out );
         success = false;
         try
         {
-            //NOTE: for blob
-            BlobIO.BlobBatchImportSession bis = BlobIO.startBlobBatchImport(storeDir, dbConfig);
+            BlobBatchImportSession bis = BlobBatchImportSession$.MODULE$.start(databaseLayout.databaseDirectory(), dbConfig); //<--pandadb-->
 
             importer.doImport( input );
             success = true;
 
-            //NOTE: for blob
-            bis.success();
+            bis.success(); //<--pandadb-->
         }
         catch ( Exception e )
         {
@@ -614,7 +615,7 @@ public class ImportTool
 
             if ( !success )
             {
-                err.println( "WARNING Import failed. The store files in " + storeDir.getAbsolutePath() +
+                err.println( "WARNING Import failed. The store files in " + databaseLayout.databaseDirectory().getAbsolutePath() +
                         " are left as they are, although they are likely in an unusable state. " +
                         "Starting a database on these store files will likely fail or observe inconsistent records so " +
                         "start at your own risk or delete the store manually" );
@@ -626,8 +627,8 @@ public class ImportTool
     {
         return args
                 .interpretOptionsWithMetadata( key, Converters.optional(),
-                        Converters.toFiles( MULTI_FILE_DELIMITER, Converters.regexFiles( true ) ), filesExist(
-                                err ),
+                        Converters.toFiles( MULTI_FILE_DELIMITER, Converters.regexFiles( true ) ),
+                        filesExist( err ),
                         Validators.atLeast( "--" + key, 1 ) );
     }
 
@@ -640,8 +641,8 @@ public class ImportTool
                 if ( file.getName().startsWith( ":" ) )
                 {
                     err.println( "It looks like you're trying to specify default label or relationship type (" +
-                                      file.getName() + "). Please put such directly on the key, f.ex. " +
-                                      Options.NODE_DATA.argument() + ":MyLabel" );
+                            file.getName() + "). Please put such directly on the key, f.ex. " +
+                            Options.NODE_DATA.argument() + ":MyLabel" );
                 }
                 Validators.REGEX_FILE_EXISTS.validate( file );
             }
@@ -649,8 +650,8 @@ public class ImportTool
     }
 
     private static Collector getBadCollector( long badTolerance, boolean skipBadRelationships,
-            boolean skipDuplicateNodes, boolean ignoreExtraColumns, boolean skipBadEntriesLogging,
-            OutputStream badOutput )
+                                              boolean skipDuplicateNodes, boolean ignoreExtraColumns, boolean skipBadEntriesLogging,
+                                              OutputStream badOutput )
     {
         int collect = collect( skipBadRelationships, skipDuplicateNodes, ignoreExtraColumns );
         return skipBadEntriesLogging ? silentBadCollector( badTolerance, collect ) : badCollector( badOutput, badTolerance, collect );
@@ -662,14 +663,14 @@ public class ImportTool
         return UNLIMITED.equals( value ) ? BadCollector.UNLIMITED_TOLERANCE : Long.parseLong( value );
     }
 
-    private static Config loadDbConfig( File file ) throws IOException
+    private static Config loadDbConfig( File file )
     {
-        return file != null && file.exists() ? Config.defaults( MapUtil.load( file ) ) : Config.defaults();
+        return Config.fromFile( file ).build();
     }
 
     static void printOverview( File storeDir, Collection<Option<File[]>> nodesFiles,
-            Collection<Option<File[]>> relationshipsFiles,
-            org.neo4j.unsafe.impl.batchimport.Configuration configuration, PrintStream out )
+                               Collection<Option<File[]>> relationshipsFiles,
+                               org.neo4j.unsafe.impl.batchimport.Configuration configuration, PrintStream out )
     {
         out.println( "Neo4j version: " + Version.getNeo4jVersion() );
         out.println( "Importing the contents of these files into " + storeDir + ":" );
@@ -718,7 +719,7 @@ public class ImportTool
     }
 
     public static void validateInputFiles( Collection<Option<File[]>> nodesFiles,
-            Collection<Option<File[]>> relationshipsFiles )
+                                           Collection<Option<File[]>> relationshipsFiles )
     {
         if ( nodesFiles.isEmpty() )
         {
@@ -790,7 +791,7 @@ public class ImportTool
         String docsVersion = String.join("-", versionParts);
 
         return " https://neo4j.com/docs/operations-manual/" + docsVersion + "/" +
-               page.getReference( anchor );
+                page.getReference( anchor );
     }
 
     /**
@@ -799,22 +800,22 @@ public class ImportTool
      * @param err
      */
     private static RuntimeException andPrintError( String typeOfError, Exception e, boolean stackTrace,
-            PrintStream err )
+                                                   PrintStream err )
     {
         // List of common errors that can be explained to the user
         if ( DuplicateInputIdException.class.equals( e.getClass() ) )
         {
             printErrorMessage( "Duplicate input ids that would otherwise clash can be put into separate id space, " +
-                               "read more about how to use id spaces in the manual:" +
-                               manualReference( ManualPage.IMPORT_TOOL_FORMAT, Anchor.ID_SPACES ), e, stackTrace,
+                            "read more about how to use id spaces in the manual:" +
+                            manualReference( ManualPage.IMPORT_TOOL_FORMAT, Anchor.ID_SPACES ), e, stackTrace,
                     err );
         }
         else if ( MissingRelationshipDataException.class.equals( e.getClass() ) )
         {
             printErrorMessage( "Relationship missing mandatory field '" +
-                               ((MissingRelationshipDataException) e).getFieldType() + "', read more about " +
-                               "relationship format in the manual: " +
-                               manualReference( ManualPage.IMPORT_TOOL_FORMAT, Anchor.RELATIONSHIP ), e, stackTrace,
+                            ((MissingRelationshipDataException) e).getFieldType() + "', read more about " +
+                            "relationship format in the manual: " +
+                            manualReference( ManualPage.IMPORT_TOOL_FORMAT, Anchor.RELATIONSHIP ), e, stackTrace,
                     err );
         }
         // This type of exception is wrapped since our input code throws InputException consistently,
@@ -823,9 +824,9 @@ public class ImportTool
         else if ( Exceptions.contains( e, IllegalMultilineFieldException.class ) )
         {
             printErrorMessage( "Detected field which spanned multiple lines for an import where " +
-                               Options.MULTILINE_FIELDS.argument() + "=false. If you know that your input data " +
-                               "include fields containing new-line characters then import with this option set to " +
-                               "true.", e, stackTrace, err );
+                    Options.MULTILINE_FIELDS.argument() + "=false. If you know that your input data " +
+                    "include fields containing new-line characters then import with this option set to " +
+                    "true.", e, stackTrace, err );
         }
         else if ( Exceptions.contains( e, InputException.class ) )
         {
@@ -861,7 +862,7 @@ public class ImportTool
     }
 
     public static Iterable<DataFactory>
-            relationshipData( final Charset encoding, Collection<Option<File[]>> relationshipsFiles )
+    relationshipData( final Charset encoding, Collection<Option<File[]>> relationshipsFiles )
     {
         return new IterableWrapper<DataFactory,Option<File[]>>( relationshipsFiles )
         {
@@ -874,7 +875,7 @@ public class ImportTool
     }
 
     public static Iterable<DataFactory> nodeData( final Charset encoding,
-            Collection<Option<File[]>> nodesFiles )
+                                                  Collection<Option<File[]>> nodesFiles )
     {
         return new IterableWrapper<DataFactory,Option<File[]>>( nodesFiles )
         {
@@ -893,10 +894,10 @@ public class ImportTool
     {
         out.println( "Neo4j Import Tool" );
         for ( String line : Args.splitLongLine( "neo4j-import is used to create a new Neo4j database "
-                                                + "from data in CSV files. "
-                                                +
-                                                "See the chapter \"Import Tool\" in the Neo4j Manual for details on the CSV file format "
-                                                + "- a special kind of header is required.", 80 ) )
+                + "from data in CSV files. "
+                +
+                "See the chapter \"Import Tool\" in the Neo4j Manual for details on the CSV file format "
+                + "- a special kind of header is required.", 80 ) )
         {
             out.println( "\t" + line );
         }
@@ -1009,8 +1010,8 @@ public class ImportTool
             public boolean trimStrings()
             {
                 return trimStrings != null
-                       ? trimStrings
-                       : defaultConfiguration.trimStrings();
+                        ? trimStrings
+                        : defaultConfiguration.trimStrings();
             }
 
             @Override

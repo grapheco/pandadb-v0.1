@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2018 "Neo4j,"
+ * Copyright (c) 2002-2019 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -19,18 +19,20 @@
  */
 package org.neo4j.unsafe.impl.batchimport;
 
-import cn.pandadb.database.BoundTransactionState;
-import cn.pandadb.database.ThreadBoundContext;
-import org.apache.lucene.util.NamedThreadFactory;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
+import cn.pandadb.database.ThreadBoundContext;
+import org.neo4j.helpers.NamedThreadFactory;
 import org.neo4j.unsafe.impl.batchimport.DataStatistics.RelationshipTypeCount;
 import org.neo4j.unsafe.impl.batchimport.cache.idmapping.IdMapper;
 import org.neo4j.unsafe.impl.batchimport.input.Collector;
@@ -50,7 +52,6 @@ import org.neo4j.unsafe.impl.batchimport.store.io.IoMonitor;
 
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
-
 import static org.neo4j.unsafe.impl.batchimport.stats.Stats.longStat;
 
 /**
@@ -112,11 +113,6 @@ public class DataImporter
             return this.properties.sum();
         }
 
-        public long relationshipsImported()
-        {
-            return this.relationships.sum();
-        }
-
         @Override
         public String toString()
         {
@@ -130,22 +126,19 @@ public class DataImporter
             throws IOException
     {
         LongAdder roughEntityCountProgress = new LongAdder();
-
-        //NOTE: state binding
-        BoundTransactionState state = ThreadBoundContext.state();
-
         ExecutorService pool = Executors.newFixedThreadPool( numRunners,
-                new NamedThreadFactory( title + "Importer" ){
-                    //NOTE: blob
+                new NamedThreadFactory( title + "Importer" ) {
+                    //<--pandadb
                     public Thread newThread(Runnable r) {
                         return super.newThread(new Runnable() {
                             @Override
                             public void run() {
-                                ThreadBoundContext.bindState(state);
+                                ThreadBoundContext.bindState(null);
                                 r.run();
                             }
                         });
                     };
+                    //pandadb-->
                 });
         IoMonitor writeMonitor = new IoMonitor( stores.getIoTracer() );
         ControllableStep step = new ControllableStep( title, roughEntityCountProgress, Configuration.DEFAULT,
@@ -220,7 +213,7 @@ public class DataImporter
         private final Key[] keys = new Key[] {Keys.done_batches, Keys.avg_processing_time};
         private final Collection<StatsProvider> statsProviders = new ArrayList<>();
 
-        private volatile boolean completed;
+        private final CountDownLatch completed = new CountDownLatch( 1 );
 
         ControllableStep( String name, LongAdder progress, Configuration config, StatsProvider... additionalStatsProviders )
         {
@@ -234,7 +227,7 @@ public class DataImporter
 
         void markAsCompleted()
         {
-            this.completed = true;
+            this.completed.countDown();
         }
 
         @Override
@@ -262,7 +255,7 @@ public class DataImporter
         @Override
         public StepStats stats()
         {
-            return new StepStats( name, completed, statsProviders );
+            return new StepStats( name, !isCompleted(), statsProviders );
         }
 
         @Override
@@ -273,7 +266,13 @@ public class DataImporter
         @Override
         public boolean isCompleted()
         {
-            return completed;
+            return completed.getCount() == 0;
+        }
+
+        @Override
+        public void awaitCompleted() throws InterruptedException
+        {
+            completed.await();
         }
 
         @Override

@@ -8,43 +8,43 @@
             <list>
                 <bean class="cn.pandadb.database.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.pandadb.semop.common.AnyPropertyExtractor"/>
+                        <bean class="cn.pandadb.oplib.common.AnyPropertyExtractor"/>
                     </property>
                     <property name="domain" value="*"/>
                 </bean>
                 <bean class="cn.pandadb.database.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.pandadb.semop.text.ChineseTokenizer"/>
+                        <bean class="cn.pandadb.oplib.text.ChineseTokenizer"/>
                     </property>
                     <property name="domain" value="string"/>
                 </bean>
                 <bean class="cn.pandadb.database.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.pandadb.semop.text.SentimentClassifier"/>
+                        <bean class="cn.pandadb.oplib.text.SentimentClassifier"/>
                     </property>
                     <property name="domain" value="string"/>
                 </bean>
                 <bean class="cn.pandadb.database.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.pandadb.semop.common.AnyBlobPropertyExtractor"/>
+                        <bean class="cn.pandadb.oplib.common.AnyBlobPropertyExtractor"/>
                     </property>
                     <property name="domain" value="blob/*"/>
                 </bean>
                 <bean class="cn.pandadb.database.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.pandadb.semop.image.ImageMetaDataExtractor"/>
+                        <bean class="cn.pandadb.oplib.image.ImageMetaDataExtractor"/>
                     </property>
                     <property name="domain" value="blob/image"/>
                 </bean>
                 <bean class="cn.pandadb.database.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.pandadb.semop.image.PlateNumberExtractor"/>
+                        <bean class="cn.pandadb.oplib.image.PlateNumberExtractor"/>
                     </property>
                     <property name="domain" value="blob/image"/>
                 </bean>
                 <bean class="cn.pandadb.database.DomainExtractorEntry">
                     <property name="extractor">
-                        <bean class="cn.pandadb.semop.image.DogOrCatClassifier"/>
+                        <bean class="cn.pandadb.oplib.image.DogOrCatClassifier"/>
                     </property>
                     <property name="domain" value="blob/image"/>
                 </bean>
@@ -58,7 +58,7 @@
                     <property name="domain" value="blob/image:blob/image"/>
                     <property name="threshold" value="0.6"/>
                     <property name="comparator">
-                        <bean class="cn.pandadb.semop.image.FaceSimilarityComparator"/>
+                        <bean class="cn.pandadb.oplib.image.FaceSimilarityComparator"/>
                     </property>
                 </bean>
                 <bean class="cn.pandadb.database.DomainComparatorEntry">
@@ -66,7 +66,7 @@
                     <property name="domain" value="string:string"/>
                     <property name="threshold" value="0.7"/>
                     <property name="comparator">
-                        <bean class="cn.pandadb.semop.text.JaroWinklerStringSimilarity"/>
+                        <bean class="cn.pandadb.oplib.text.JaroWinklerStringSimilarity"/>
                     </property>
                 </bean>
                 <bean class="cn.pandadb.database.DomainComparatorEntry">
@@ -74,7 +74,7 @@
                     <property name="domain" value="string:string"/>
                     <property name="threshold" value="0.7"/>
                     <property name="comparator">
-                        <bean class="cn.pandadb.semop.text.JaccardStringSimilarity"/>
+                        <bean class="cn.pandadb.oplib.text.JaccardStringSimilarity"/>
                     </property>
                 </bean>
                 <bean class="cn.pandadb.database.DomainComparatorEntry">
@@ -82,7 +82,7 @@
                     <property name="domain" value="string:string"/>
                     <property name="threshold" value="0.7"/>
                     <property name="comparator">
-                        <bean class="cn.pandadb.semop.text.CosineStringSimilarity"/>
+                        <bean class="cn.pandadb.oplib.text.CosineStringSimilarity"/>
                     </property>
                 </bean>
             </list>
