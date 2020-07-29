@@ -4,6 +4,7 @@ import org.neo4j.blob.Blob
 import cn.pandadb.database.PandaDB
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.junit.Before
+import org.neo4j.blob.impl.BlobFactory
 
 class TestBase {
   @Before
@@ -26,15 +27,15 @@ class TestBase {
       node1.setProperty("bytes", IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))));
 
       //with a blob property
-      node1.setProperty("photo", Blob.fromFile(new File("./testinput/ai/test.png")));
+      node1.setProperty("photo", BlobFactory.fromFile(new File("./testinput/ai/test.png")));
       //blob array
-      node1.setProperty("photo2", (0 to 1).map(x => Blob.fromFile(new File("./testinput/ai/test.png"))).toArray);
+      node1.setProperty("photo2", (0 to 1).map(x => BlobFactory.fromFile(new File("./testinput/ai/test.png"))).toArray);
 
       val node2 = db.createNode();
 
       node2.setProperty("name", "alex");
       //with a blob property
-      node2.setProperty("photo", Blob.fromFile(new File("./testinput/ai/test1.png")));
+      node2.setProperty("photo", BlobFactory.fromFile(new File("./testinput/ai/test1.png")));
 
       tx.success();
       tx.close();

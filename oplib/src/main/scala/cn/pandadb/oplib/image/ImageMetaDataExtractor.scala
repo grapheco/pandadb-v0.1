@@ -3,7 +3,7 @@ package cn.pandadb.oplib.image
 import cn.pandadb.commons.semop.SubPropertyExtractor
 import javax.imageio.ImageIO
 import org.neo4j.blob.Blob
-import org.neo4j.blob.utils.Configuration
+import org.neo4j.blob.util.Configuration
 /**
   * Created by bluejoe on 2019/2/17.
   */

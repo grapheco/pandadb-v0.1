@@ -1,7 +1,7 @@
 package cn.pandadb.database
 
 import java.io.File
-import org.neo4j.blob.utils.Logging
+import org.neo4j.blob.util.Logging
 import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.graphdb.factory.GraphDatabaseFactory
 import org.neo4j.kernel.impl.blob.{BlobPropertyStoreServiceContext, BlobPropertyStoreServicePlugin, BlobPropertyStoreServicePlugins}

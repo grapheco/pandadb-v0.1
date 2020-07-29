@@ -5,7 +5,7 @@ import java.util.Optional
 
 import cn.pandadb.database.{PandaDB, Touchable}
 import org.apache.commons.io.IOUtils
-import org.neo4j.blob.utils.Logging
+import org.neo4j.blob.util.Logging
 import org.neo4j.server.{AbstractNeoServer, CommunityBootstrapper}
 
 import scala.collection.JavaConversions

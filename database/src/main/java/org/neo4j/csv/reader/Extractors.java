@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.neo4j.blob.Blob;
-import org.neo4j.blob.Blob$;
+import org.neo4j.blob.impl.BlobFactory;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.*;
 
@@ -408,7 +408,7 @@ public class Extractors
         protected boolean extract0( char[] data, int offset, int length, CSVHeaderInformation optionalData )
         {
             String tmpStr = new String( data, offset, length );
-            Blob blob = Blob$.MODULE$.fromURL(tmpStr);
+            Blob blob = BlobFactory.fromURL(tmpStr);
             value = new BlobValue(blob);
             return true;
         }

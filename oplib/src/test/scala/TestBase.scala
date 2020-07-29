@@ -1,5 +1,5 @@
 package cn.panda.semop.test
-import org.neo4j.blob.utils.Configuration
+import org.neo4j.blob.util.Configuration
 
 class ConfigTemp extends Configuration {
   override def getRaw(name: String): Option[String] = {

@@ -2,7 +2,7 @@ package cn.pandadb.oplib.common
 
 import cn.pandadb.commons.semop.SubPropertyExtractor
 import org.neo4j.blob.Blob
-import org.neo4j.blob.utils.Configuration
+import org.neo4j.blob.util.Configuration
 /**
   * Created by bluejoe on 2019/2/17.
   */

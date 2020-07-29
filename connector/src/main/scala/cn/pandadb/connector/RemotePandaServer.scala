@@ -1,6 +1,6 @@
 package cn.pandadb.connector
 
-import org.neo4j.blob.utils.Logging
+import org.neo4j.blob.util.Logging
 
 /**
   * Created by bluejoe on 2019/7/17.

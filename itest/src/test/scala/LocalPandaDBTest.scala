@@ -3,6 +3,7 @@ import java.io.{File, FileInputStream}
 import org.neo4j.blob.Blob
 import org.apache.commons.io.IOUtils
 import org.junit.{Assert, Before, Test}
+import org.neo4j.blob.impl.BlobFactory
 import org.neo4j.graphdb.Node
 
 import scala.collection.JavaConversions
@@ -114,10 +115,10 @@ class LocalPandaDBTest extends TestBase {
       JavaConversions.mapAsJavaMap(Map("NAME" -> "张三")));
 
     db2.execute("CREATE (n {name:{NAME}, photo:{BLOB_OBJECT}})",
-      JavaConversions.mapAsJavaMap(Map("NAME" -> "张三", "BLOB_OBJECT" -> Blob.EMPTY)));
+      JavaConversions.mapAsJavaMap(Map("NAME" -> "张三", "BLOB_OBJECT" -> BlobFactory.EMPTY)));
 
     db2.execute("CREATE (n {name:{NAME}, photo:{BLOB_OBJECT}})",
-      JavaConversions.mapAsJavaMap(Map("NAME" -> "张三", "BLOB_OBJECT" -> Blob.fromFile(new File("./testinput/ai/test.png")))));
+      JavaConversions.mapAsJavaMap(Map("NAME" -> "张三", "BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test.png")))));
 
     Assert.assertEquals(3.toLong, db2.execute("match (n) where n.name=$NAME return count(n)",
       JavaConversions.mapAsJavaMap(Map("NAME" -> "张三"))).next().get("count(n)"));
@@ -128,7 +129,7 @@ class LocalPandaDBTest extends TestBase {
     Assert.assertEquals(null,
       it2.next().get("n.photo"));
 
-    Assert.assertEquals(it2.next().get("n.photo"), Blob.EMPTY);
+    Assert.assertEquals(it2.next().get("n.photo"), BlobFactory.EMPTY);
 
     Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
       it2.next().get("n.photo").asInstanceOf[Blob].offerStream {

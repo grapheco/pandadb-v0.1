@@ -1,10 +1,11 @@
-import java.io.{FileInputStream, File}
+import java.io.{File, FileInputStream}
 
 import org.neo4j.blob.Blob
 import cn.pandadb.database.PandaDB
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.junit.{Assert, Test}
-import org.neo4j.graphdb.{Node, GraphDatabaseService}
+import org.neo4j.blob.impl.BlobFactory
+import org.neo4j.graphdb.{GraphDatabaseService, Node}
 
 class MultiPandaDBTest {
   def testCreateBlob(db: GraphDatabaseService, file: File): Unit = {
@@ -16,7 +17,7 @@ class MultiPandaDBTest {
     node1.setProperty("age", 30);
 
     //with a blob property
-    node1.setProperty("photo", Blob.fromFile(file));
+    node1.setProperty("photo", BlobFactory.fromFile(file));
 
     tx.success();
     tx.close();

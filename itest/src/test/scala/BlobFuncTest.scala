@@ -5,6 +5,7 @@ import cn.pandadb.database.PandaDB
 import org.apache.commons.io.FileUtils
 import org.junit.{Assert, Test}
 import org.neo4j.blob.Blob
+import org.neo4j.blob.impl.BlobFactory
 
 class BlobFuncTest extends TestBase {
   @Test
@@ -27,7 +28,7 @@ class BlobFuncTest extends TestBase {
     val node1 = db.createNode();
     node1.setProperty("name", "bob");
     //with a blob property
-    node1.setProperty("photo", Blob.fromFile(new File("./testinput/ai/test.png")));
+    node1.setProperty("photo", BlobFactory.fromFile(new File("./testinput/ai/test.png")));
     db.execute("create (n: Person {name:'yahoo', photo: Blob.fromFile('./testinput/ai/test2.jpg')})");
 
     val len2 = db.execute("return Blob.len(Blob.fromFile('./testinput/ai/test.png')) as len").next().get("len").asInstanceOf[Long];

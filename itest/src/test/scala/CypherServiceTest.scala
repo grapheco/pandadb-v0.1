@@ -6,6 +6,7 @@ import cn.pandadb.connector.{CypherService, RemotePandaServer}
 import cn.pandadb.server.PandaServer
 import org.apache.commons.io.IOUtils
 import org.junit.{Assert, Test}
+import org.neo4j.blob.impl.BlobFactory
 import org.neo4j.driver.Record
 
 class CypherServiceTest extends TestBase {
@@ -94,16 +95,16 @@ class CypherServiceTest extends TestBase {
       Map("NAME" -> "张三"));
 
     client.executeUpdate("CREATE (n {name:{NAME}, photo:{BLOB_OBJECT}})",
-      Map("NAME" -> "张三", "BLOB_OBJECT" -> Blob.EMPTY));
+      Map("NAME" -> "张三", "BLOB_OBJECT" -> BlobFactory.EMPTY));
 
     client.executeUpdate("CREATE (n {name:{NAME}, photo:{BLOB_OBJECT}})",
-      Map("NAME" -> "张三", "BLOB_OBJECT" -> Blob.fromFile(new File("./testinput/ai/test1.png"))));
+      Map("NAME" -> "张三", "BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test1.png"))));
 
     client.executeQuery("return {BLOB_OBJECT}",
-      Map("BLOB_OBJECT" -> Blob.fromFile(new File("./testinput/ai/test.png"))));
+      Map("BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test.png"))));
 
     client.querySingleObject("return {BLOB_OBJECT}",
-      Map("BLOB_OBJECT" -> Blob.fromFile(new File("./testinput/ai/test.png"))), (result: Record) => {
+      Map("BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test.png"))), (result: Record) => {
         val blob = result.get(0).asBlob
 
         Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),

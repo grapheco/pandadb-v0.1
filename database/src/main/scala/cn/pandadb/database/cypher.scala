@@ -1,7 +1,7 @@
 package cn.pandadb.database
 
-import org.neo4j.blob.utils.ReflectUtils._
-import org.neo4j.blob.utils.{ContextMap, Logging}
+import org.neo4j.blob.util.ReflectUtils._
+import org.neo4j.blob.util.{ContextMap, Logging}
 import org.neo4j.cypher.internal.runtime.interpreted.commands.convert.{ExpressionConverters, ExtendedCommandExpr}
 import org.neo4j.cypher.internal.runtime.interpreted.commands.expressions.{Expression => CommandExpression}
 import org.neo4j.cypher.internal.runtime.interpreted.commands.predicates.Predicate

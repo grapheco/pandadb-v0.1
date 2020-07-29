@@ -43,6 +43,11 @@
             <artifactId>scala-parser-combinators_2.11</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.grapheco</groupId>
+            <artifactId>graiph-blob-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

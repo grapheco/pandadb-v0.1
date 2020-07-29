@@ -164,13 +164,22 @@
                 <artifactId>hadoop-common</artifactId>
                 <version>${hadoop.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.grapheco</groupId>
+                <artifactId>graiph-blob-api</artifactId>
+                <version>0.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.grapheco</groupId>
+                <artifactId>graiph-blob-impl</artifactId>
+                <version>0.1.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.grapheco</groupId>
-            <artifactId>graiph-blob-commons</artifactId>
-            <version>0.1.0</version>
+            <artifactId>graiph-blob-api</artifactId>
         </dependency>
     </dependencies>
     <build>

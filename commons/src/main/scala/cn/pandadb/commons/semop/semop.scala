@@ -1,6 +1,6 @@
 package cn.pandadb.commons.semop
 
-import org.neo4j.blob.utils.Configuration
+import org.neo4j.blob.util.Configuration
 
 trait SubPropertyExtractor {
   def declareProperties(): Map[String, Class[_]];

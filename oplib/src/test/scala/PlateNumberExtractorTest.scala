@@ -4,6 +4,7 @@ import java.io.File
 import cn.pandadb.oplib.image.PlateNumberExtractor
 import org.junit.{Assert, Test}
 import org.neo4j.blob.Blob
+import org.neo4j.blob.impl.BlobFactory
 
 
 class PlateNumberExtractorTest extends TestBase {
@@ -13,7 +14,7 @@ class PlateNumberExtractorTest extends TestBase {
   @Test
   def test1():Unit={
     var imagePath1 = "testinput/plate_number1.jpg"
-    val res = plateExtractor.extract(Blob.fromFile(new File(imagePath1)))
+    val res = plateExtractor.extract(BlobFactory.fromFile(new File(imagePath1)))
     assert(res.get("plateNumber").isDefined && res.get("plateNumber").get.equals("苏E730V7"))
     print(res)
   }

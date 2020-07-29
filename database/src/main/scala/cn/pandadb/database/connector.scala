@@ -5,7 +5,7 @@ import java.util.stream.Stream
 
 import cn.pandadb.connector.CypherService
 import org.neo4j.driver.util.Pair
-import org.neo4j.blob.utils.Logging
+import org.neo4j.blob.util.Logging
 import org.neo4j.driver.{Record, Session, StatementResult, Value, Values}
 import org.neo4j.driver.internal.types.InternalMapAccessorWithDefaultValue
 import org.neo4j.driver.internal.value.{NodeValue, RelationshipValue}

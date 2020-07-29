@@ -1,8 +1,9 @@
 package cn.pandadb.database
 
 import cn.pandadb.commons.semop.{PropertyValueComparator, SingleValueComparator, SubPropertyExtractor, ValueSetComparator}
-import org.neo4j.blob.utils.{Configuration, Logging}
+import org.neo4j.blob.util.{Configuration, Logging}
 import org.neo4j.blob.Blob
+import org.neo4j.blob.impl.BlobFactory
 
 import scala.beans.BeanProperty
 import scala.collection.mutable
@@ -113,7 +114,7 @@ class CypherPluginRegistry {
     def like(a: Any, b: Any, algoName: Option[String], threshold: Option[Double]): Option[Boolean] = {
       (a, b) match {
         case (null, null) => Some(true)
-        case (Blob.EMPTY, Blob.EMPTY) => Some(true)
+        case (BlobFactory.EMPTY, BlobFactory.EMPTY) => Some(true)
         case (null, _) => Some(false)
         case (_, null) => Some(false)
         case _ =>

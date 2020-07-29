@@ -3,8 +3,8 @@ package cn.pandadb.oplib.service
 import java.io.InputStream
 
 import cn.pandadb.commons.semop.PropertyValueComparator
-import org.neo4j.blob.utils.ConfigUtils._
-import org.neo4j.blob.utils.Configuration
+import org.neo4j.blob.util.ConfigUtils._
+import org.neo4j.blob.util.Configuration
 
 import scala.collection.immutable.Map
 import scala.util.parsing.json.JSON

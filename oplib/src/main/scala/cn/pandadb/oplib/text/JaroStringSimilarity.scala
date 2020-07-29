@@ -2,7 +2,7 @@ package cn.pandadb.oplib.text
 
 import cn.pandadb.commons.semop.SingleValueComparator
 import info.debatty.java.stringsimilarity.{Cosine, Jaccard, JaroWinkler}
-import org.neo4j.blob.utils.Configuration
+import org.neo4j.blob.util.Configuration
 
 /**
   * Created by bluejoe on 2019/2/17.

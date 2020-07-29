@@ -3,6 +3,7 @@ import java.io.File
 import org.neo4j.blob.Blob
 import cn.pandadb.database.PandaDB
 import org.apache.commons.io.FileUtils
+import org.neo4j.blob.impl.BlobFactory
 
 object BlobIOPerfTest {
   def main(args: Array[String]) {
@@ -28,10 +29,10 @@ object BlobIOPerfTest {
       node.setProperty("id", i);
       //with a blob property
       for (m <- 0 to 9)
-        node.setProperty(s"photo1-$m", Blob.fromFile(new File("./testinput/ai/test.png")));
+        node.setProperty(s"photo1-$m", BlobFactory.fromFile(new File("./testinput/ai/test.png")));
 
       for (m <- 0 to 9)
-        node.setProperty(s"photo2-$m", (0 to 9).map(x => Blob.fromFile(new File("./testinput/ai/test.png"))).toArray);
+        node.setProperty(s"photo2-$m", (0 to 9).map(x => BlobFactory.fromFile(new File("./testinput/ai/test.png"))).toArray);
 
       x += (10 + 10 * 10)
 

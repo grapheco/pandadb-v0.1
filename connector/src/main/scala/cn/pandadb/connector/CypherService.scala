@@ -1,6 +1,6 @@
 package cn.pandadb.connector
 
-import org.neo4j.blob.utils.Logging
+import org.neo4j.blob.util.Logging
 import org.neo4j.driver.{Record, Session, StatementResult}
 
 import scala.reflect.ClassTag
