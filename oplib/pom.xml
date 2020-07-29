@@ -42,5 +42,10 @@
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-parser-combinators_2.11</artifactId>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

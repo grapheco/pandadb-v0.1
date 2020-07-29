@@ -28,10 +28,10 @@ object BlobIOPerfTest {
       node.setProperty("id", i);
       //with a blob property
       for (m <- 0 to 9)
-        node.setProperty(s"photo1-$m", Blob.fromFile(new File("./testinput/test.png")));
+        node.setProperty(s"photo1-$m", Blob.fromFile(new File("./testinput/ai/test.png")));
 
       for (m <- 0 to 9)
-        node.setProperty(s"photo2-$m", (0 to 9).map(x => Blob.fromFile(new File("./testinput/test.png"))).toArray);
+        node.setProperty(s"photo2-$m", (0 to 9).map(x => Blob.fromFile(new File("./testinput/ai/test.png"))).toArray);
 
       x += (10 + 10 * 10)
 

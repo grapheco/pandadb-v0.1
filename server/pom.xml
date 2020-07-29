@@ -12,13 +12,17 @@
     <artifactId>server</artifactId>
     <dependencies>
         <dependency>
+            <groupId>pandadb</groupId>
+            <artifactId>database</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.neo4j.app</groupId>
             <artifactId>neo4j-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>pandadb</groupId>
-            <artifactId>database</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-bolt</artifactId>
         </dependency>
     </dependencies>
 

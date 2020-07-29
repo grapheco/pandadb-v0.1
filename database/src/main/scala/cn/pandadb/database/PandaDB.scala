@@ -8,16 +8,17 @@ import org.neo4j.kernel.impl.blob.{BlobPropertyStoreServiceContext, BlobProperty
 import org.springframework.context.support.FileSystemXmlApplicationContext
 
 /**
-  * Created by bluejoe on 2019/7/17.
-  */
+ * Created by bluejoe on 2019/7/17.
+ */
 object PandaDB extends Logging with Touchable {
   CypherInjection.touch;
   SemanticOperatorPluginInjection.touch;
 
   def openDatabase(dbDir: File, propertiesFile: File): GraphDatabaseService = {
     val builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbDir);
-    logger.info(s"loading configuration from $propertiesFile");
-    builder.loadPropertiesFromFile(propertiesFile.getPath);
+    val pfile = propertiesFile.getCanonicalFile.getAbsoluteFile
+    logger.info(s"loading configuration from $pfile");
+    builder.loadPropertiesFromFile(pfile.getPath);
     //bolt server is not required
     builder.setConfig("dbms.connector.bolt.enabled", "false");
     builder.newGraphDatabase();
