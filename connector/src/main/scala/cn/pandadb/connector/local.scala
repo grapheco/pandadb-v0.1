@@ -1,16 +1,15 @@
-package cn.pandadb.database
+package cn.pandadb.connector
 
 import java.util.function.Function
 import java.util.stream.Stream
 
-import cn.pandadb.connector.CypherService
-import org.neo4j.driver.util.Pair
 import org.neo4j.blob.util.Logging
-import org.neo4j.driver.{Record, Session, StatementResult, Value, Values}
+import org.neo4j.driver._
 import org.neo4j.driver.internal.types.InternalMapAccessorWithDefaultValue
 import org.neo4j.driver.internal.value.{NodeValue, RelationshipValue}
 import org.neo4j.driver.internal.{InternalNode, InternalPair, InternalRelationship}
 import org.neo4j.driver.summary.ResultSummary
+import org.neo4j.driver.util.Pair
 import org.neo4j.graphdb.{GraphDatabaseService, Result}
 
 import scala.collection.JavaConversions

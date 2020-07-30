@@ -1,12 +1,20 @@
 package cn.pandadb.connector
 
 import org.neo4j.blob.util.Logging
-import org.neo4j.driver._
+import org.neo4j.driver.{AuthTokens, GraphDatabase, Record, Session, StatementResult, Transaction, TransactionWork}
 
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 
+/**
+  * Created by bluejoe on 2019/7/17.
+  */
+object RemotePandaServer extends Logging {
+  def connect(url: String, user: String = "", pass: String = ""): CypherService = {
+    new BoltService(url, user, pass);
+  }
+}
 
 class BoltService(url: String, user: String = "", pass: String = "")
   extends Logging with CypherService {

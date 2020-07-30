@@ -16,6 +16,11 @@
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
         </dependency>
+        <dependency>
+            <groupId>pandadb</groupId>
+            <artifactId>database</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
