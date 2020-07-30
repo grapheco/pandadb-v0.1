@@ -1,6 +1,6 @@
 package cn.pandadb.database
 
-import cn.pandadb.commons.semop.{PropertyValueComparator, SingleValueComparator, SubPropertyExtractor, ValueSetComparator}
+import cn.pandadb.semop.{PropertyValueComparator, SingleValueComparator, SubPropertyExtractor, ValueSetComparator}
 import org.neo4j.blob.util.{Configuration, Logging}
 import org.neo4j.blob.Blob
 import org.neo4j.blob.impl.BlobFactory
