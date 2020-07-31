@@ -117,7 +117,7 @@ class CypherServiceTest extends TestBase {
 
   @Test
   def testRemoteBoltServer(): Unit = {
-    val server = PandaServer.start(new File("./testoutput/testdb"), new File("./testinput/neo4j.conf"));
+    val server = PandaServer.start(new File("./testoutput/testdb"), new File("./testinput/neo4j.conf"), Map("dbms.connector.http.enabled"->"false"));
     val client = RemotePandaServer.connect("bolt://localhost:7687");
     testCypher(client);
     server.shutdown();

@@ -26,7 +26,7 @@ import org.parboiled.scala._
 /**
   * Created by bluejoe on 2019/7/16.
   */
-object CypherInjection extends Expressions with Logging with Touchable {
+object CypherInjection extends Expressions with Logging {
   private def AlgoNameWithThreshold: Rule1[AlgoNameWithThresholdExpr] = rule("an algorithm with threshold") {
     group(SymbolicNameString ~ optional(operator("/") ~ DoubleLiteral)) ~~>>
       ((a, b) => AlgoNameWithThresholdExpr(Some(a), b.map(_.value))) |

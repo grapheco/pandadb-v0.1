@@ -3,17 +3,14 @@ package cn.pandadb.database
 import java.io.File
 import org.neo4j.blob.util.Logging
 import org.neo4j.graphdb.GraphDatabaseService
+import org.neo4j.graphdb.facade.extension.{DatabaseLifecyclePlugin, DatabaseLifecyclePluginContext}
 import org.neo4j.graphdb.factory.GraphDatabaseFactory
-import org.neo4j.kernel.impl.blob.{BlobPropertyStoreServiceContext, BlobPropertyStoreServicePlugin, BlobPropertyStoreServicePlugins}
 import org.springframework.context.support.FileSystemXmlApplicationContext
 
 /**
  * Created by bluejoe on 2019/7/17.
  */
-object PandaDB extends Logging with Touchable {
-  CypherInjection.touch;
-  SemanticOperatorPluginInjection.touch;
-
+object PandaDB extends Logging {
   def openDatabase(dbDir: File, propertiesFile: File): GraphDatabaseService = {
     val builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbDir);
     val pfile = propertiesFile.getCanonicalFile.getAbsoluteFile
@@ -25,18 +22,11 @@ object PandaDB extends Logging with Touchable {
   }
 }
 
-trait Touchable {
-  //do nothing, just ensure this object is initialized
-  final def touch: Unit = {
-  }
-}
+class SemanticOperatorPlugin extends DatabaseLifecyclePlugin with Logging {
+  override def init(ctx: DatabaseLifecyclePluginContext): Unit = {
+    //just invoke CypherInjection
+    CypherInjection.logger
 
-object SemanticOperatorPluginInjection extends Touchable {
-  BlobPropertyStoreServicePlugins.add(new SemanticOperatorPlugin());
-}
-
-class SemanticOperatorPlugin extends BlobPropertyStoreServicePlugin with Logging {
-  override def init(ctx: BlobPropertyStoreServiceContext): Unit = {
     val configuration = ctx.configuration;
     val cypherPluginRegistry = configuration.getRaw("blob.plugins.conf").map(x => {
       val xml = new File(x);
@@ -70,11 +60,11 @@ class SemanticOperatorPlugin extends BlobPropertyStoreServicePlugin with Logging
     ctx.instanceContext.put[ValueMatcher](valueMatcher);
   }
 
-  override def stop(ctx: BlobPropertyStoreServiceContext): Unit = {
+  override def stop(ctx: DatabaseLifecyclePluginContext): Unit = {
 
   }
 
-  override def start(ctx: BlobPropertyStoreServiceContext): Unit = {
+  override def start(ctx: DatabaseLifecyclePluginContext): Unit = {
 
   }
 }

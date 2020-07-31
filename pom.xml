@@ -189,6 +189,14 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>sdc</id>
+            <name>Repository</name>
+            <url>http://10.0.82.220:8081/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
