@@ -34,60 +34,57 @@ class CypherServiceTest extends TestBase {
     Assert.assertEquals(0, blob0.length);
 
     val blob1 = client.querySingleObject(s"return Blob.fromFile('${basedir}/ai/test.png')", (result: Record) => {
-      result.get(0).asBlob
+      val onlineBlob = result.get(0).asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        });
     });
-
-    Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-      blob1.offerStream {
-        IOUtils.toByteArray(_)
-      });
 
     val blob12 = client.querySingleObject(s"return <file://${basedir}/ai/test.png>", (result: Record) => {
-      result.get(0).asBlob
+      val onlineBlob = result.get(0).asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        });
     });
 
-    Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-      blob12.offerStream {
-        IOUtils.toByteArray(_)
-      });
-
     client.querySingleObject("match (n) where n.name='bob' return n.photo,n.photo2", (result: Record) => {
-      val blob2 = result.get("n.photo").asBlob;
-      val blob22 = result.get("n.photo2").asList()
+      val blob1 = result.get("n.photo").asBlob;
+      val blob2 = result.get("n.photo2").asList()
       Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-        blob2.offerStream {
+        blob1.offerStream {
           IOUtils.toByteArray(_)
         });
 
-      Assert.assertEquals(2, blob22.size());
+      Assert.assertEquals(2, blob2.size());
 
       Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-        blob22.get(0).asInstanceOf[Blob].offerStream {
+        blob2.get(0).asInstanceOf[Blob].offerStream {
           IOUtils.toByteArray(_)
         });
       Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-        blob22.get(1).asInstanceOf[Blob].offerStream {
+        blob2.get(1).asInstanceOf[Blob].offerStream {
           IOUtils.toByteArray(_)
         });
     });
 
     client.querySingleObject("match (n) where n.name='alex' return n.photo", (result: Record) => {
-      val blob3 = result.get("n.photo").asBlob
+      val onlineBlob = result.get("n.photo").asBlob
       Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test1.png"))),
-        blob3.offerStream {
+        onlineBlob.offerStream {
           IOUtils.toByteArray(_)
         });
     });
 
     //query with parameters
-    val blob4 = client.querySingleObject("match (n) where n.name={NAME} return n.photo",
+    client.querySingleObject("match (n) where n.name={NAME} return n.photo",
       Map("NAME" -> "bob"), (result: Record) => {
-        result.get("n.photo").asBlob
-      });
-
-    Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-      blob4.offerStream {
-        IOUtils.toByteArray(_)
+        val onlineBlob = result.get("n.photo").asBlob
+        Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
+          onlineBlob.offerStream {
+            IOUtils.toByteArray(_)
+          });
       });
 
     //commit new records
