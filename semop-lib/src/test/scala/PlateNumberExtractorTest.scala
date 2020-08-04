@@ -13,7 +13,7 @@ class PlateNumberExtractorTest extends TestBase {
 
   @Test
   def test1():Unit={
-    var imagePath1 = "testinput/plate_number1.jpg"
+    var imagePath1 = "./testinput/plate_number1.jpg"
     val res = plateExtractor.extract(BlobFactory.fromFile(new File(imagePath1)))
     assert(res.get("plateNumber").isDefined && res.get("plateNumber").get.equals("苏E730V7"))
     print(res)

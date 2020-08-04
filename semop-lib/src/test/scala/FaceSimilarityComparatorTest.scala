@@ -13,8 +13,8 @@ class FaceSimilarityComparatorTest extends TestBase {
 
   @Test
   def test1():Unit={
-    var imagePath1 = "testinput/photo1.jpg"
-    var imagePath2 = "testinput/photo2.jpg"
+    var imagePath1 = "./testinput/photo1.jpg"
+    var imagePath2 = "./testinput/photo2.jpg"
     val res = simComparator.compareAsSets(BlobFactory.fromFile(new File(imagePath1)),
       BlobFactory.fromFile(new File(imagePath2)))
     print(res)

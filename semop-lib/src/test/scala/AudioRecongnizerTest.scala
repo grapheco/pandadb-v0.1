@@ -14,7 +14,7 @@ class AudioRecongnizerTest extends TestBase {
 
   @Test
   def test1():Unit={
-    var imagePath1 = "C:\\Users\\hai\\Desktop\\temp.wav"
+    var imagePath1 = "./temp.wav"
     val res = audioRecongnizer.extract(BlobFactory.fromFile(new File(imagePath1)))
     print(res)
   }

@@ -129,7 +129,7 @@ class CypherPlusTest extends TestBase {
     Assert.assertEquals(2976, db.execute(s"return <file://${basedir}/bluejoe1.jpg>->height as x")
       .next().get("x"));
 
-    Assert.assertEquals(true, db.execute(s"return <file://${basedir}/bluejoe1.jpg>->plateNumber = '京NB6666' as r")
+    Assert.assertEquals(true, db.execute(s"return <file://${basedir}/car1.jpg>->plateNumber = '苏E730V7' as r")
       .next().get("r").asInstanceOf[Boolean]);
 
     Assert.assertEquals(true, db.execute(s"return <file://${basedir}/test.wav>->message = '中华人民共和国' as r")
