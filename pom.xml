@@ -20,7 +20,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <compile.version>1.8</compile.version>
-        <jetty.version>9.4.8.v20171121</jetty.version>
         <neo4j.version>3.5.6-BLOB-SNAPSHOT</neo4j.version>
         <hbase.version>2.0.2</hbase.version>
         <hadoop.version>2.7.7</hadoop.version>
@@ -125,17 +124,6 @@
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>3.0.0</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-server</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
-                <version>${jetty.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-jaxrs -->
             <dependency>

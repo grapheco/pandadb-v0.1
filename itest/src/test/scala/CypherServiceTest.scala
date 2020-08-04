@@ -1,7 +1,6 @@
 import java.io.{File, FileInputStream}
 
 import org.neo4j.blob.Blob
-import cn.pandadb.database.PandaDB
 import cn.pandadb.connector.{CypherService, LocalGraphService, RemotePandaServer}
 import cn.pandadb.server.PandaServer
 import org.apache.commons.io.IOUtils
