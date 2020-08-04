@@ -48,7 +48,7 @@ class CypherPlusTest extends TestBase {
       s"return <file://${basedir}/bluejoe1.jpg> ~: <file://${basedir}/bluejoe2.jpg> as r")
       .next().get("r").asInstanceOf[Boolean]);
 
-    Assert.assertEquals(true, db.execute(s"<file://${basedir}/car1.jpg> ~: '.*730V7' as r")
+    Assert.assertEquals(true, db.execute(s"return <file://${basedir}/car1.jpg> ~: '.*730V7' as r")
       .next().get("r").asInstanceOf[Boolean]);
 
     tx.success();

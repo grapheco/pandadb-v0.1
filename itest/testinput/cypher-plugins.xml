@@ -62,6 +62,14 @@
                     </property>
                 </bean>
                 <bean class="cn.pandadb.database.DomainComparatorEntry">
+                    <property name="name" value="face"/>
+                    <property name="domain" value="blob/image:string"/>
+                    <property name="threshold" value="0.6"/>
+                    <property name="comparator">
+                        <bean class="cn.pandadb.semoplib.image.PlateNumber2TextSimilarityComparator"/>
+                    </property>
+                </bean>
+                <bean class="cn.pandadb.database.DomainComparatorEntry">
                     <property name="name" value="jaro"/>
                     <property name="domain" value="string:string"/>
                     <property name="threshold" value="0.7"/>
