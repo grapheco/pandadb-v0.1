@@ -1,8 +1,6 @@
 package cn.pandadb.database
 
 import java.io.File
-
-import org.apache.commons.io.IOUtils
 import org.neo4j.blob.util.Logging
 import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.graphdb.facade.extension.{DatabaseLifecyclePlugin, DatabaseLifecyclePluginContext}
@@ -13,8 +11,6 @@ import org.springframework.context.support.FileSystemXmlApplicationContext
  * Created by bluejoe on 2019/7/17.
  */
 object PandaDB extends Logging {
-  val logo = IOUtils.toString(this.getClass.getClassLoader.getResourceAsStream("logo.txt"), "utf-8");
-
   def openDatabase(dbDir: File, propertiesFile: File): GraphDatabaseService = {
     val builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbDir);
     val pfile = propertiesFile.getCanonicalFile.getAbsoluteFile

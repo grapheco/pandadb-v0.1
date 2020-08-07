@@ -13,6 +13,8 @@ import scala.collection.JavaConversions
   * Created by bluejoe on 2019/7/17.
   */
 object PandaServer extends Logging {
+  val logo = IOUtils.toString(this.getClass.getClassLoader.getResourceAsStream("logo.txt"), "utf-8");
+
   def start(dbDir: File, configFile: File, configOverrides: Map[String, String] = Map()): PandaServer = {
     val server = new PandaServer(dbDir, configFile, configOverrides)
     server.start()
