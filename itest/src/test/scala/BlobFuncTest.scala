@@ -30,7 +30,6 @@ class BlobFuncTest extends TestBase {
     //with a blob property
     node1.setProperty("photo", BlobFactory.fromFile(new File("./testinput/ai/test.png")));
     db.execute("create (n: Person {name:'yahoo', photo: Blob.fromFile('./testinput/ai/test2.jpg')})");
-    db.execute("create (n: Person {name:'yahoo', photo: Blob.fromFile('./testinput/ai/test2.jpg')} return n)");
     val len2 = db.execute("return Blob.len(Blob.fromFile('./testinput/ai/test.png')) as len").next().get("len").asInstanceOf[Long];
     Assert.assertEquals(len2, new File("./testinput/ai/test.png").length());
 
