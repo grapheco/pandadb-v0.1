@@ -19,6 +19,12 @@ class CypherPlusTest extends TestBase {
 
     Assert.assertTrue(blob1.length > 0)
 
+    val blob12 = db.execute("return <https://bluejoe2008.github.io/p4.png> as r").next().get("r").asInstanceOf[Blob];
+    Assert.assertArrayEquals(IOUtils.toByteArray(new URL("https://bluejoe2008.github.io/p4.png")),
+      blob12.offerStream {
+        IOUtils.toByteArray(_)
+      })
+
     val basedir = new File("./testinput/ai").getCanonicalFile.getAbsolutePath
     val blob2 = db.execute(s"return <file://${basedir}/bluejoe1.jpg> as r").next().get("r").asInstanceOf[Blob];
     Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File(basedir, "bluejoe1.jpg"))),

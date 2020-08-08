@@ -49,6 +49,22 @@ class CypherServiceTest extends TestBase {
         })
     })
 
+    client.querySingleObject(s"return <https://www.baidu.com/img/flexible/logo/pc/result.png>", (result: Record) => {
+      val onlineBlob = result.get(0).asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new URL("https://www.baidu.com/img/flexible/logo/pc/result.png").openConnection().getInputStream),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        })
+    })
+
+    client.querySingleObject(s"return <https://bluejoe2008.github.io/p4.png>", (result: Record) => {
+      val onlineBlob = result.get(0).asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new URL("https://bluejoe2008.github.io/p4.png").openConnection().getInputStream),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        })
+    })
+
     client.querySingleObject(s"CREATE (n {name:'yahoo', photo:<file://${basedir}/ai/test.png>}) return n.photo", (result: Record) => {
       val onlineBlob = result.get(0).asBlob
       Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
