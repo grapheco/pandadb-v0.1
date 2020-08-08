@@ -80,7 +80,7 @@ this command will create a Person node with a BLOB property, which content come 
 
 in `neo4j-browser`, a BLOB property will be displayed as an image icon:
 
-<img src="https://github.com/cas-bigdatalab/graiphdb/blob/master/docs/neo4j-browser.png?raw=true" width="500">
+<img src="https://github.com/grapheco/pandadb-v0.1/blob/master/docs/snapshot1.png?raw=true" width="500">
 
 NOTE: if user/password is required, try default values: `neo4j`/`neo4j`.
 
