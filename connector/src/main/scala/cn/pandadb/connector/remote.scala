@@ -28,12 +28,6 @@ class BoltService(url: String, user: String = "", pass: String = "")
     result;
   }
 
-  override def queryObjects[T: ClassTag](queryString: String, fnMap: (Record => T)): Iterator[T] = {
-    executeQuery(queryString, (result: StatementResult) => {
-      result.map(fnMap)
-    });
-  }
-
   override def executeUpdate(queryString: String) = {
     _executeUpdate(queryString, None);
   }

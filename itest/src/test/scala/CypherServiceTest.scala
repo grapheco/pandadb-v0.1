@@ -40,13 +40,29 @@ class CypherServiceTest extends TestBase {
         });
     });
 
-    val blob12 = client.querySingleObject(s"return <file://${basedir}/ai/test.png>", (result: Record) => {
+    client.querySingleObject(s"return <file://${basedir}/ai/test.png>", (result: Record) => {
       val onlineBlob = result.get(0).asBlob
       Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
         onlineBlob.offerStream {
           IOUtils.toByteArray(_)
-        });
-    });
+        })
+    })
+
+    client.querySingleObject(s"CREATE (n {name:'yahoo', photo:<file://${basedir}/ai/test.png>}) return n.photo", (result: Record) => {
+      val onlineBlob = result.get(0).asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        })
+    })
+
+    client.querySingleObject(s"CREATE (n {name:'lianxin', photo:<file://./testinput/ai/test.png>}) return n", (result: Record) => {
+      val onlineBlob = result.get(0).asNode().get("photo").asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        })
+    })
 
     client.querySingleObject("match (n) where n.name='bob' return n.photo,n.photo2", (result: Record) => {
       val blob1 = result.get("n.photo").asBlob;
@@ -96,8 +112,20 @@ class CypherServiceTest extends TestBase {
     client.executeUpdate("CREATE (n {name:{NAME}, photo:{BLOB_OBJECT}})",
       Map("NAME" -> "张三", "BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test1.png"))));
 
+    val res = client.queryObjects("CREATE (n {name:{NAME}, photo:{BLOB_OBJECT}}) return n.photo",
+      Map("NAME" -> "张三", "BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test1.png"))),
+      (record) => {
+        val blob = record.get(0).asBlob()
+        Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test1.png"))),
+          blob.offerStream {
+            IOUtils.toByteArray(_)
+          });
+      });
+
+    Assert.assertEquals(1, res.length)
+
     client.executeQuery("return {BLOB_OBJECT}",
-      Map("BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test.png"))));
+      Map("BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test.png"))), (result) => result);
 
     client.querySingleObject("return {BLOB_OBJECT}",
       Map("BLOB_OBJECT" -> BlobFactory.fromFile(new File("./testinput/ai/test.png"))), (result: Record) => {
@@ -113,7 +141,7 @@ class CypherServiceTest extends TestBase {
 
   @Test
   def testRemoteBoltServer(): Unit = {
-    val server = PandaServer.start(new File("./testoutput/testdb"), new File("./testinput/neo4j.conf"), Map("dbms.connector.http.enabled"->"false"));
+    val server = PandaServer.start(new File("./testoutput/testdb"), new File("./testinput/neo4j.conf"), Map("dbms.connector.http.enabled" -> "false"));
     val client = RemotePandaServer.connect("bolt://localhost:7687");
     testCypher(client);
     server.shutdown();

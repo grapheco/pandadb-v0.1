@@ -21,7 +21,6 @@ object LocalGraphService {
 
 class LocalGraphService(db: GraphDatabaseService)
   extends Logging with CypherService {
-  override def queryObjects[T: ClassManifest](queryString: String, fnMap: (Record) => T): Iterator[T] = ???
 
   override def execute[T](f: (Session) => T): T = {
     throw new UnsupportedOperationException();

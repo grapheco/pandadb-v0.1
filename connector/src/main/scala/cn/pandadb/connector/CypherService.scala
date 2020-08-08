@@ -3,13 +3,34 @@ package cn.pandadb.connector
 import org.neo4j.blob.util.Logging
 import org.neo4j.driver.{Record, Session, StatementResult}
 
+import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
 
 /**
-  * Created by bluejoe on 2019/7/26.
-  */
+ * Created by bluejoe on 2019/7/26.
+ */
 trait CypherService extends Logging {
-  def queryObjects[T: ClassTag](queryString: String, fnMap: (Record => T)): Iterator[T];
+  final def queryObjects[T: ClassTag](queryString: String, fnMap: (Record => T)): Iterator[T] = {
+    executeQuery(queryString, (result) => {
+      val records = ArrayBuffer[T]()
+      while (result.hasNext) {
+        val record = result.next()
+        records += fnMap(record)
+      }
+      records.iterator
+    })
+  }
+
+  final def queryObjects[T: ClassTag](queryString: String, params: Map[String, AnyRef], fnMap: (Record => T)): Iterator[T] = {
+    executeQuery(queryString, params, (result) => {
+      val records = ArrayBuffer[T]()
+      while (result.hasNext) {
+        val record = result.next()
+        records += fnMap(record)
+      }
+      records.iterator
+    })
+  }
 
   def execute[T](f: (Session) => T): T;
 
@@ -21,20 +42,15 @@ trait CypherService extends Logging {
 
   def executeUpdate(queryString: String, params: Map[String, AnyRef]);
 
-  final def executeQuery[T](queryString: String, params: Map[String, AnyRef]): Unit =
-    executeQuery(queryString, params, (StatementResult) => {
-      null.asInstanceOf[T]
-    })
-
   final def querySingleObject[T](queryString: String, fnMap: (Record => T)): T = {
     executeQuery(queryString, (rs: StatementResult) => {
       fnMap(rs.next());
-    });
+    })
   }
 
   final def querySingleObject[T](queryString: String, params: Map[String, AnyRef], fnMap: (Record => T)): T = {
     executeQuery(queryString, params, (rs: StatementResult) => {
       fnMap(rs.next());
-    });
+    })
   }
 }
