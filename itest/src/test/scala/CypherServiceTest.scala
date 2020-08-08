@@ -1,4 +1,5 @@
 import java.io.{File, FileInputStream}
+import java.net.URL
 
 import org.neo4j.blob.Blob
 import cn.pandadb.connector.{CypherService, LocalGraphService, RemotePandaServer}
@@ -56,9 +57,28 @@ class CypherServiceTest extends TestBase {
         })
     })
 
+    //inline blob
     client.querySingleObject(s"CREATE (n {name:'lianxin', photo:<file://./testinput/ai/test.png>}) return n", (result: Record) => {
       val onlineBlob = result.get(0).asNode().get("photo").asBlob
       Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        })
+    })
+
+    //remote blob
+    client.querySingleObject(s"CREATE (n {name:'bluejoe', photo:<file://./testinput/ai/bluejoe1.jpg>}) return n", (result: Record) => {
+      val onlineBlob = result.get(0).asNode().get("photo").asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/bluejoe1.jpg"))),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        })
+    })
+
+    //http blob
+    client.querySingleObject(s"CREATE (n {name:'lzxddz', photo:<https://www.baidu.com/img/flexible/logo/pc/result.png>}) return n", (result: Record) => {
+      val onlineBlob = result.get(0).asNode().get("photo").asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new URL("https://www.baidu.com/img/flexible/logo/pc/result.png").openConnection().getInputStream),
         onlineBlob.offerStream {
           IOUtils.toByteArray(_)
         })
