@@ -6,7 +6,6 @@ Intelligent Graph Database (import from GraiphDB https://github.com/grapheco/gra
 [![GitHub issues](https://img.shields.io/github/issues/grapheco/pandadb-v0.1.svg)](https://github.com/grapheco/pandadb-v0.1/issues)
 [![GitHub forks](https://img.shields.io/github/forks/grapheco/pandadb-v0.1.svg)](https://github.com/grapheco/pandadb-v0.1/network)
 [![GitHub stars](https://img.shields.io/github/stars/grapheco/pandadb-v0.1.svg)](https://github.com/grapheco/pandadb-v0.1/stargazers)
-[![GitHub license](https://img.shields.io/github/license/grapheco/pandadb-v0.1.svg)](https://github.com/grapheco/pandadb-v0.1/blob/master/LICENSE)
 
 * single machine
 * intelligent property graph model
