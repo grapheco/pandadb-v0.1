@@ -91,10 +91,19 @@ class CypherServiceTest extends TestBase {
         })
     })
 
-    //http blob
+    //http inline blob
     client.querySingleObject(s"CREATE (n {name:'lzxddz', photo:<https://www.baidu.com/img/flexible/logo/pc/result.png>}) return n", (result: Record) => {
       val onlineBlob = result.get(0).asNode().get("photo").asBlob
       Assert.assertArrayEquals(IOUtils.toByteArray(new URL("https://www.baidu.com/img/flexible/logo/pc/result.png").openConnection().getInputStream),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        })
+    })
+
+    //http remote blob
+    client.querySingleObject(s"CREATE (n {name:'bluejoe', photo:<https://bluejoe2008.github.io/p4.png>}) return n", (result: Record) => {
+      val onlineBlob = result.get(0).asNode().get("photo").asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new URL("https://bluejoe2008.github.io/p4.png").openConnection().getInputStream),
         onlineBlob.offerStream {
           IOUtils.toByteArray(_)
         })
