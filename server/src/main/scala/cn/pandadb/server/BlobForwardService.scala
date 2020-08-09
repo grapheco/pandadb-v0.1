@@ -6,9 +6,8 @@ import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.neo4j.blob.Blob
 import org.neo4j.blob.util.Logging
 import org.neo4j.kernel.configuration.Config
-import org.neo4j.kernel.impl.{KernelTransactionClosed, KernelTransactionEvent, KernelTransactionEventHub, KernelTransactionEventListener, TransactionalBlobCached}
+import org.neo4j.kernel.impl.{KernelTransactionEvent, KernelTransactionEventHub, KernelTransactionEventListener, TransactionalBlobCached}
 import org.neo4j.server.configuration.ApplicationContextEnhancer
-
 import scala.collection.mutable
 
 class BlobForwardService extends ApplicationContextEnhancer {
@@ -20,12 +19,14 @@ class BlobForwardService extends ApplicationContextEnhancer {
       override def doGet(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
         val uri = req.getRequestURI
         val handle = uri.substring(uri.indexOf("/blob/") + "/blob/".length)
-        if (handle.isEmpty)
-          throw new RuntimeException(s"invalid handle: $handle")
+        if (handle.isEmpty) {
+          resp.sendError(500, s"invalid handle: $handle")
+        }
 
-        cache.get(handle).orElse(
-          throw new RuntimeException(s"invalid handle: $handle")
-        ).foreach(blob => {
+        cache.get(handle).orElse {
+          resp.sendError(500, s"invalid handle: $handle")
+          scala.None
+        }.foreach(blob => {
           resp.setContentLengthLong(blob.length)
           resp.setContentType(blob.mimeType.text)
           blob.offerStream(is =>
