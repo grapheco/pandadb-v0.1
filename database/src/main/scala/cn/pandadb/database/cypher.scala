@@ -1,18 +1,23 @@
 package cn.pandadb.database
 
+import java.io.File
+
+import org.apache.commons.codec.binary.Base64
+import org.neo4j.blob.Blob
+import org.neo4j.blob.impl.BlobFactory
 import org.neo4j.blob.util.ReflectUtils._
-import org.neo4j.blob.util.{ContextMap, Logging}
-import org.neo4j.cypher.internal.runtime.interpreted.commands.convert.{ExpressionConverters, ExtendedCommandExpr}
+import org.neo4j.blob.util.ContextMap
+import org.neo4j.cypher.internal.runtime.interpreted.commands.convert.{CustomConvertableExpr, ExpressionConverters}
 import org.neo4j.cypher.internal.runtime.interpreted.commands.expressions.{Expression => CommandExpression}
 import org.neo4j.cypher.internal.runtime.interpreted.commands.predicates.Predicate
 import org.neo4j.cypher.internal.runtime.interpreted.commands.values.KeyToken
 import org.neo4j.cypher.internal.runtime.interpreted.commands.values.TokenType._
 import org.neo4j.cypher.internal.runtime.interpreted.pipes.QueryState
 import org.neo4j.cypher.internal.runtime.interpreted.{ExecutionContext, UpdateCountingQueryContext}
+import org.neo4j.cypher.internal.v3_5.ast.semantics.SemanticExpressionCheck.expectType
 import org.neo4j.cypher.internal.v3_5.ast.semantics._
 import org.neo4j.cypher.internal.v3_5.expressions.Expression.SemanticContext
 import org.neo4j.cypher.internal.v3_5.expressions._
-import org.neo4j.cypher.internal.v3_5.parser.{ExprExtensions, Expressions}
 import org.neo4j.cypher.internal.v3_5.util.InputPosition
 import org.neo4j.cypher.internal.v3_5.util.attribution.Id
 import org.neo4j.cypher.internal.v3_5.util.symbols._
@@ -21,60 +26,51 @@ import org.neo4j.kernel.configuration.Config
 import org.neo4j.values.AnyValue
 import org.neo4j.values.storable.{Value, _}
 import org.neo4j.values.virtual.VirtualValues
-import org.parboiled.scala._
 
 /**
   * Created by bluejoe on 2019/7/16.
   */
-object CypherInjection extends Expressions with Logging {
-  private def AlgoNameWithThreshold: Rule1[AlgoNameWithThresholdExpr] = rule("an algorithm with threshold") {
-    group(SymbolicNameString ~ optional(operator("/") ~ DoubleLiteral)) ~~>>
-      ((a, b) => AlgoNameWithThresholdExpr(Some(a), b.map(_.value))) |
-      group(DoubleLiteral ~ optional(operator("/") ~ SymbolicNameString)) ~~>>
-        ((a, b) => AlgoNameWithThresholdExpr(b, Some(a.value)))
-  }
+trait BlobURL {
+  def asCanonicalString: String;
 
-  private def AlgoName: Rule1[AlgoNameWithThresholdExpr] = rule("an algorithm with threshold") {
-    group(SymbolicNameString) ~~>>
-      ((a) => AlgoNameWithThresholdExpr(Some(a), None))
-  }
+  def createBlob(): Blob;
+}
 
-  logger.debug(s"injecting cypher expression extensions...");
+case class BlobLiteralExpr(value: BlobURL)(val position: InputPosition)
+  extends ast.Expression with CustomCheckableExpr  with CustomConvertableExpr {
+  override def asCanonicalStringVal = value.asCanonicalString
 
-  ExprExtensions.extendsExpr2((Expression1: Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression]) => {
-    operator("->") ~~ (PropertyKeyName ~~>> (CustomPropertyExpr(_: ast.Expression, _))) ////NOTE: cypher plus
-  });
+  override def check(ctx: SemanticContext): SemanticCheck = expectType(CTBlob, this)
 
-  ExprExtensions.extendsExpr3((Expression2: Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression]) => {
-    group(operator("~:") ~ optional(AlgoNameWithThreshold) ~~ Expression2) ~~>>
-      ((a: ast.Expression, b, c) =>
-        SemanticLikeExpr(a, b, c)) |
-      group(operator("!:") ~ optional(AlgoNameWithThreshold) ~~ Expression2) ~~>>
-        ((a: ast.Expression, b, c) =>
-          SemanticUnlikeExpr(a, b, c)) |
-      group(operator(":::") ~ optional(AlgoName) ~~ Expression2) ~~>>
-        ((a: ast.Expression, b, c) =>
-          SemanticSetCompareExpr(a, b, c)) |
-      group(operator(">>:") ~ optional(AlgoNameWithThreshold) ~~ Expression2) ~~>>
-        ((a: ast.Expression, b, c) =>
-          SemanticContainSetExpr(a, b, c)) |
-      group(operator("<<:") ~ optional(AlgoNameWithThreshold) ~~ Expression2) ~~>>
-        ((a: ast.Expression, b, c) =>
-          SemanticSetInExpr(a, b, c)) |
-      group(operator("::") ~ optional(AlgoName) ~~ Expression2) ~~>>
-        ((a: ast.Expression, b, c) =>
-          SemanticCompareExpr(a, b, c)) |
-      group(operator(">:") ~ optional(AlgoNameWithThreshold) ~~ Expression2) ~~>>
-        ((a: ast.Expression, b, c) =>
-          SemanticContainExpr(a, b, c)) |
-      group(operator("<:") ~ optional(AlgoNameWithThreshold) ~~ Expression2) ~~>>
-        ((a: ast.Expression, b, c) =>
-          SemanticInExpr(a, b, c))
-  });
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression = new BlobLiteralCommand(value)
+}
+
+case class BlobFileURL(filePath: String) extends BlobURL {
+  override def asCanonicalString = filePath
+
+  def createBlob(): Blob = BlobFactory.fromFile(new File(filePath))
+}
+
+case class BlobBase64URL(base64: String) extends BlobURL {
+  override def asCanonicalString = base64
+
+  def createBlob(): Blob = BlobFactory.fromBytes(Base64.decodeBase64(base64))
+}
+
+case class BlobHttpURL(url: String) extends BlobURL {
+  override def asCanonicalString = url
+
+  def createBlob(): Blob = BlobFactory.fromHttpURL(url)
+}
+
+case class BlobFtpURL(url: String) extends BlobURL {
+  override def asCanonicalString = url
+
+  def createBlob(): Blob = BlobFactory.fromURL(url)
 }
 
 case class AlgoNameWithThresholdExpr(algorithm: Option[String], threshold: Option[Double])(val position: InputPosition)
-  extends Expression with ExtendedExpr {
+  extends Expression with CustomCheckableExpr {
 
   override def check(ctx: SemanticContext): SemanticCheck =
     (state: SemanticState) =>
@@ -89,11 +85,11 @@ case class AlgoNameWithThresholdExpr(algorithm: Option[String], threshold: Optio
       ).getOrElse(SemanticCheckResult.success(state))
 }
 
-case class CustomPropertyExpr(map: Expression, propertyKey: PropertyKeyName)(val position: InputPosition)
-  extends LogicalProperty with ExtendedExpr with ExtendedCommandExpr {
+case class CustomPropertyExpr(map: ast.Expression, propertyKey: PropertyKeyName)(val position: InputPosition)
+  extends LogicalProperty with CustomCheckableExpr with CustomConvertableExpr {
   override def asCanonicalStringVal = s"${map.asCanonicalStringVal}.${propertyKey.asCanonicalStringVal}"
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     CustomPropertyCommand(self.toCommandExpression(id, map), PropertyKey(this.propertyKey.name))
 
   override def check(ctx: SemanticContext): SemanticCheck =
@@ -102,15 +98,15 @@ case class CustomPropertyExpr(map: Expression, propertyKey: PropertyKeyName)(val
       SemanticExpressionCheck.specifyType(CTAny.covariant, this)
 }
 
-case class SemanticLikeExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
-  extends Expression with BinaryOperatorExpression with ExtendedExpr with ExtendedCommandExpr {
+case class SemanticLikeExpr(lhs: ast.Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
+  extends Expression with BinaryOperatorExpression with CustomCheckableExpr with CustomConvertableExpr {
   override val signatures = Vector(
     TypeSignature(argumentTypes = Vector(CTAny, CTAny), outputType = CTBoolean)
   )
 
   override def canonicalOperatorSymbol = this.getClass.getSimpleName
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     SemanticLikeCommand(self.toCommandExpression(id, this.lhs), this.ant, self.toCommandExpression(id, this.rhs))
 
   override def check(ctx: SemanticContext): SemanticCheck =
@@ -118,13 +114,13 @@ case class SemanticLikeExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdEx
       SemanticExpressionCheck.checkTypes(this, this.signatures)
 }
 
-case class SemanticUnlikeExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
-  extends Expression with BinaryOperatorExpression with ExtendedExpr with ExtendedCommandExpr {
+case class SemanticUnlikeExpr(lhs: ast.Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
+  extends Expression with BinaryOperatorExpression with CustomCheckableExpr with CustomConvertableExpr {
   override val signatures = Vector(
     TypeSignature(argumentTypes = Vector(CTAny, CTAny), outputType = CTBoolean)
   )
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     SemanticUnlikeCommand(self.toCommandExpression(id, this.lhs), this.ant, self.toCommandExpression(id, this.rhs))
 
   override def canonicalOperatorSymbol = this.getClass.getSimpleName
@@ -134,13 +130,13 @@ case class SemanticUnlikeExpr(lhs: Expression, ant: Option[AlgoNameWithThreshold
       SemanticExpressionCheck.checkTypes(this, this.signatures)
 }
 
-case class SemanticCompareExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
-  extends Expression with BinaryOperatorExpression with ExtendedExpr with ExtendedCommandExpr {
+case class SemanticCompareExpr(lhs: ast.Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
+  extends Expression with BinaryOperatorExpression with CustomCheckableExpr with CustomConvertableExpr {
   override val signatures = Vector(
     TypeSignature(argumentTypes = Vector(CTAny, CTAny), outputType = CTFloat)
   )
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     SemanticCompareCommand(self.toCommandExpression(id, this.lhs), this.ant, self.toCommandExpression(id, this.rhs))
 
   override def canonicalOperatorSymbol = this.getClass.getSimpleName
@@ -150,13 +146,13 @@ case class SemanticCompareExpr(lhs: Expression, ant: Option[AlgoNameWithThreshol
       SemanticExpressionCheck.checkTypes(this, this.signatures)
 }
 
-case class SemanticSetCompareExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
-  extends Expression with BinaryOperatorExpression with ExtendedExpr with ExtendedCommandExpr {
+case class SemanticSetCompareExpr(lhs: ast.Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
+  extends Expression with BinaryOperatorExpression with CustomCheckableExpr with CustomConvertableExpr {
   override val signatures = Vector(
     TypeSignature(argumentTypes = Vector(CTAny, CTAny), outputType = CTList(CTList(CTFloat)))
   )
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     SemanticSetCompareCommand(self.toCommandExpression(id, this.lhs), this.ant, self.toCommandExpression(id, this.rhs))
 
   override def canonicalOperatorSymbol = this.getClass.getSimpleName
@@ -166,13 +162,13 @@ case class SemanticSetCompareExpr(lhs: Expression, ant: Option[AlgoNameWithThres
       SemanticExpressionCheck.checkTypes(this, this.signatures)
 }
 
-case class SemanticContainExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
-  extends Expression with BinaryOperatorExpression with ExtendedExpr with ExtendedCommandExpr {
+case class SemanticContainExpr(lhs: ast.Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
+  extends Expression with BinaryOperatorExpression with CustomCheckableExpr with CustomConvertableExpr {
   override val signatures = Vector(
     TypeSignature(argumentTypes = Vector(CTAny, CTAny), outputType = CTBoolean)
   )
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     SemanticContainCommand(self.toCommandExpression(id, this.lhs), this.ant, self.toCommandExpression(id, this.rhs))
 
   override def canonicalOperatorSymbol = this.getClass.getSimpleName
@@ -182,13 +178,13 @@ case class SemanticContainExpr(lhs: Expression, ant: Option[AlgoNameWithThreshol
       SemanticExpressionCheck.checkTypes(this, this.signatures)
 }
 
-case class SemanticInExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
-  extends Expression with BinaryOperatorExpression with ExtendedExpr with ExtendedCommandExpr {
+case class SemanticInExpr(lhs: ast.Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
+  extends Expression with BinaryOperatorExpression with CustomCheckableExpr with CustomConvertableExpr {
   override val signatures = Vector(
     TypeSignature(argumentTypes = Vector(CTAny, CTAny), outputType = CTBoolean)
   )
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     SemanticInCommand(self.toCommandExpression(id, this.lhs), this.ant, self.toCommandExpression(id, this.rhs))
 
   override def canonicalOperatorSymbol = this.getClass.getSimpleName
@@ -199,12 +195,12 @@ case class SemanticInExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr
 }
 
 case class SemanticContainSetExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
-  extends Expression with BinaryOperatorExpression with ExtendedExpr with ExtendedCommandExpr {
+  extends Expression with BinaryOperatorExpression with CustomCheckableExpr with CustomConvertableExpr {
   override val signatures = Vector(
     TypeSignature(argumentTypes = Vector(CTAny, CTAny), outputType = CTBoolean)
   )
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     SemanticContainSetCommand(self.toCommandExpression(id, this.lhs), this.ant, self.toCommandExpression(id, this.rhs))
 
   override def canonicalOperatorSymbol = this.getClass.getSimpleName
@@ -214,15 +210,15 @@ case class SemanticContainSetExpr(lhs: Expression, ant: Option[AlgoNameWithThres
       SemanticExpressionCheck.checkTypes(this, this.signatures)
 }
 
-case class SemanticSetInExpr(lhs: Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
-  extends Expression with BinaryOperatorExpression with ExtendedExpr with ExtendedCommandExpr {
+case class SemanticSetInExpr(lhs: ast.Expression, ant: Option[AlgoNameWithThresholdExpr], rhs: Expression)(val position: InputPosition)
+  extends Expression with BinaryOperatorExpression with CustomCheckableExpr with CustomConvertableExpr {
   override val signatures = Vector(
     TypeSignature(argumentTypes = Vector(CTAny, CTAny), outputType = CTBoolean)
   )
 
   override def canonicalOperatorSymbol = this.getClass.getSimpleName
 
-  override def makeCommand(id: Id, self: ExpressionConverters): CommandExpression =
+  override def convert(id: Id, self: ExpressionConverters): CommandExpression =
     SemanticSetInCommand(self.toCommandExpression(id, this.lhs), this.ant, self.toCommandExpression(id, this.rhs))
 
   override def check(ctx: SemanticContext): SemanticCheck =
@@ -447,4 +443,16 @@ case class SemanticSetCompareCommand(lhsExpr: CommandExpression, ant: Option[Alg
 
 class InvalidSemanticOperatorException(compared: AnyValue) extends RuntimeException {
 
+}
+
+case class BlobLiteralCommand(url: BlobURL) extends CommandExpression {
+  def apply(ctx: ExecutionContext, state: QueryState): AnyValue = {
+    BlobValue(url.createBlob());
+  }
+
+  override def rewrite(f: (CommandExpression) => CommandExpression): CommandExpression = f(this)
+
+  override def arguments: Seq[CommandExpression] = Nil
+
+  override def symbolTableDependencies: Set[String] = Set()
 }

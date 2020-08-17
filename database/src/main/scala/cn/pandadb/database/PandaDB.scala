@@ -25,8 +25,6 @@ object PandaDB extends Logging {
 class SemanticOperatorPlugin extends DatabaseLifecyclePlugin with Logging {
   override def init(ctx: DatabaseLifecyclePluginContext): Unit = {
     //just invoke CypherInjection
-    CypherInjection.logger
-
     val configuration = ctx.configuration;
     val cypherPluginRegistry = configuration.getRaw("blob.plugins.conf").map(x => {
       val xml = new File(x);
