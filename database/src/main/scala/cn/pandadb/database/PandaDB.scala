@@ -24,38 +24,13 @@ object PandaDB extends Logging {
 
 class SemanticOperatorPlugin extends DatabaseLifecyclePlugin with Logging {
   override def init(ctx: DatabaseLifecyclePluginContext): Unit = {
-    //just invoke CypherInjection
     val configuration = ctx.configuration;
-    val cypherPluginRegistry = configuration.getRaw("blob.plugins.conf").map(x => {
-      val xml = new File(x);
+    val cypherPluginRegistry = new CypherPluginRegistry(configuration)
+    val customPropertyProvider = cypherPluginRegistry.createCustomPropertyProvider()
+    val valueMatcher = cypherPluginRegistry.createValueComparatorRegistry()
 
-      val path =
-        if (xml.isAbsolute) {
-          xml.getPath
-        }
-        else {
-          val configFilePath = configuration.getRaw("config.file.path")
-          if (configFilePath.isDefined) {
-            new File(new File(configFilePath.get).getParentFile, x).getAbsoluteFile.getCanonicalPath
-          }
-          else {
-            xml.getAbsoluteFile.getCanonicalPath
-          }
-        }
-
-      logger.info(s"loading semantic plugins: $path");
-      val appctx = new FileSystemXmlApplicationContext("file:" + path);
-      appctx.getBean[CypherPluginRegistry](classOf[CypherPluginRegistry]);
-    }).getOrElse {
-      logger.info(s"semantic plugins not loaded: blob.plugins.conf=null");
-      new CypherPluginRegistry()
-    }
-
-    val customPropertyProvider = cypherPluginRegistry.createCustomPropertyProvider(configuration);
-    val valueMatcher = cypherPluginRegistry.createValueComparatorRegistry(configuration);
-
-    ctx.instanceContext.put[CustomPropertyProvider](customPropertyProvider);
-    ctx.instanceContext.put[ValueMatcher](valueMatcher);
+    ctx.instanceContext.put[CustomPropertyProvider](customPropertyProvider)
+    ctx.instanceContext.put[ValueMatcher](valueMatcher)
   }
 
   override def stop(ctx: DatabaseLifecyclePluginContext): Unit = {

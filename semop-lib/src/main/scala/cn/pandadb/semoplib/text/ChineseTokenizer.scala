@@ -1,8 +1,9 @@
 package cn.pandadb.semoplib.text
 
 import cn.pandadb.semoplib.service.ServiceInitializer
-import cn.pandadb.semop.SubPropertyExtractor
+import cn.pandadb.semop.{DomainType, SemanticExtractor, SubPropertyExtractor}
 
+@SemanticExtractor(name = "chs-tokenizer", domain = DomainType.String)
 class ChineseTokenizer extends SubPropertyExtractor with ServiceInitializer {
 
   override def declareProperties() = Map("words" -> classOf[Array[String]])

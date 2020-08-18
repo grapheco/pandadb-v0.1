@@ -1,16 +1,21 @@
 package cn.pandadb.database
 
-import cn.pandadb.semop.{PropertyValueComparator, SingleValueComparator, SubPropertyExtractor, ValueSetComparator}
+import cn.pandadb.semop.{DomainType, PropertyValueComparator, SemanticComparator, SemanticExtractor, SingleValueComparator, SubPropertyExtractor, ValueSetComparator}
 import org.neo4j.blob.util.{Configuration, Logging}
 import org.neo4j.blob.Blob
 import org.neo4j.blob.impl.BlobFactory
+import org.reflections.Reflections
 
 import scala.beans.BeanProperty
 import scala.collection.mutable
+import org.neo4j.blob.util.ConfigUtils._
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Created by bluejoe on 2019/1/31.
-  */
+ * Created by bluejoe on 2019/1/31.
+ */
 trait CustomPropertyProvider {
   def getCustomProperty(x: Any, propertyName: String): Option[Any];
 }
@@ -23,60 +28,84 @@ trait ValueMatcher {
   def containsSet(a: Any, b: Any, algoName: Option[String], threshold: Option[Double]): Option[Boolean];
 
   /**
-    * compares two values
-    */
+   * compares two values
+   */
   def compareOne(a: Any, b: Any, algoName: Option[String]): Option[Double];
 
   /**
-    * compares two objects as sets
-    */
+   * compares two objects as sets
+   */
   def compareSet(a: Any, b: Any, algoName: Option[String]): Option[Array[Array[Double]]];
 }
 
-object ValueType {
-  def typeNameOf(x: Any): String = x match {
-    case b: Blob => s"blob/${b.mimeType.major}".toLowerCase()
-    case _ => x.getClass.getSimpleName.toLowerCase()
+case class DomainExtractorEntry(extractor: SubPropertyExtractor,
+                                name: String,
+                                domain: DomainType) {
+}
+
+case class DomainComparatorEntry(comparator: PropertyValueComparator,
+                                 name: String,
+                                 domain: (DomainType, DomainType),
+                                 threshold: Double) {
+}
+
+class CypherPluginRegistry(conf: Configuration) extends Logging {
+  val extractors = ArrayBuffer[DomainExtractorEntry]();
+  val comparators = ArrayBuffer[DomainComparatorEntry]();
+
+  {
+    val packages = conf.getValueAsString("semops.package.prefix", "cn.pandadb.semoplib").split(";")
+
+    packages.foreach { prefix =>
+      val reflections = new Reflections(prefix)
+      reflections.getTypesAnnotatedWith(classOf[SemanticExtractor]).toSet.foreach { clz: Class[_] =>
+        val an = clz.getAnnotation(classOf[SemanticExtractor])
+        extractors += DomainExtractorEntry(
+          clz.newInstance().asInstanceOf[SubPropertyExtractor],
+          an.name(),
+          an.domain())
+      }
+
+      reflections.getTypesAnnotatedWith(classOf[SemanticComparator]).toSet.foreach { clz: Class[_] =>
+        val an = clz.getAnnotation(classOf[SemanticComparator])
+        comparators += DomainComparatorEntry(
+          clz.newInstance().asInstanceOf[PropertyValueComparator],
+          an.name(),
+          an.domains()(0) -> an.domains()(1),
+          an.threshold())
+      }
+    }
+
+    if (!extractors.isEmpty && logger.isDebugEnabled()) {
+      logger.debug(s"loaded ${extractors.size} semantic extractors: ${extractors.map(_.name).toList}")
+    }
+
+    if (!comparators.isEmpty && logger.isDebugEnabled()) {
+      logger.debug(s"loaded ${comparators.size} semantic comparators: ${comparators.map(_.name).toList}")
+    }
   }
 
-  val ANY_BLOB = "blob/*";
-  val ANY = "*";
+  private def domainTypeNameOf(x: Any): DomainType = x match {
+    case b: Blob => b.mimeType.major.toLowerCase() match {
+      case "image" => DomainType.BlobImage
+      case "audio" => DomainType.BlobAudio
+    }
+    case _: String => DomainType.String
+  }
 
-  def typeNameOf(a: Any, b: Any): String = s"${typeNameOf(a)}:${typeNameOf(b)}"
-
-  def concat(a: String, b: String): String = s"$a:$b"
-}
-
-class DomainExtractorEntry {
-  @BeanProperty var domain: String = "";
-  @BeanProperty var extractor: SubPropertyExtractor = _;
-}
-
-class DomainComparatorEntry {
-  @BeanProperty var domain: String = "";
-  //default threshold
-  @BeanProperty var threshold: Double = 0.7;
-  @BeanProperty var name: String = "";
-  @BeanProperty var comparator: PropertyValueComparator = _;
-}
-
-class CypherPluginRegistry {
-  @BeanProperty var extractors: Array[DomainExtractorEntry] = Array();
-  @BeanProperty var comparators: Array[DomainComparatorEntry] = Array();
-
-  def createCustomPropertyProvider(conf: Configuration) = new CustomPropertyProvider {
+  def createCustomPropertyProvider() = new CustomPropertyProvider {
     extractors.foreach(_.extractor.initialize(conf));
 
     //propertyName, typeName
-    val map: Map[(String, String), Array[SubPropertyExtractor]] = extractors
+    val map: Map[(String, DomainType), Array[SubPropertyExtractor]] = extractors
       .flatMap(x => x.extractor.declareProperties().map(prop => (prop._1, x.domain) -> x.extractor))
       .groupBy(_._1)
-      .map(x => x._1 -> x._2.map(_._2))
+      .map(x => x._1 -> x._2.map(_._2).toArray)
 
     //TODO: cache extraction
     def getCustomProperty(x: Any, name: String): Option[Any] = {
       //image:png
-      val m1 = map.get(name -> ValueType.typeNameOf(x)).map(_.head.extract(x).apply(name));
+      val m1 = map.get(name -> domainTypeNameOf(x)).map(_.head.extract(x).apply(name));
 
       if (m1.isDefined) {
         m1
@@ -85,7 +114,7 @@ class CypherPluginRegistry {
         //blob:*
         val m3 =
           if (x.isInstanceOf[Blob]) {
-            map.get(name -> ValueType.ANY_BLOB).map(_.head.extract(x).apply(name))
+            map.get(name -> DomainType.BlobAny).map(_.head.extract(x).apply(name))
           }
           else {
             None
@@ -96,14 +125,14 @@ class CypherPluginRegistry {
         }
         else {
           //*
-          map.get(name -> ValueType.ANY)
+          map.get(name -> DomainType.Any)
             .map(_.head.extract(x).apply(name))
         }
       }
     }
   }
 
-  def createValueComparatorRegistry(conf: Configuration) = new ValueMatcher with Logging {
+  def createValueComparatorRegistry() = new ValueMatcher with Logging {
     type CompareAnyMethod = (Any, Any) => Any;
     type CompareValueMethod = (Any, Any) => Double;
     type CompareSetMethod = (Any, Any) => Array[Array[Double]];
@@ -171,9 +200,9 @@ class CypherPluginRegistry {
       }
     }
 
-    private def getMatchedComparator(compareValueOrSet: Boolean, typeA: String, typeB: String, algoName: Option[String]): Option[(CompareAnyMethod, DomainComparatorEntry)] = {
-      def isEntryMatched(entry: DomainComparatorEntry, typeName: String): Boolean = {
-        val f = entry.domain.equalsIgnoreCase(typeName) &&
+    private def getMatchedComparator(compareValueOrSet: Boolean, typeA: DomainType, typeB: DomainType, algoName: Option[String]): Option[(CompareAnyMethod, DomainComparatorEntry)] = {
+      def isEntryMatched(entry: DomainComparatorEntry, typeA: DomainType, typeB: DomainType): Boolean = {
+        val f = entry.domain.equals(typeA -> typeB) &&
           (if (compareValueOrSet)
             entry.comparator.isInstanceOf[SingleValueComparator]
           else
@@ -194,35 +223,39 @@ class CypherPluginRegistry {
           comparator.asInstanceOf[ValueSetComparator].compareAsSets(a, b);
       }
 
-      comparators.find(isEntryMatched(_, ValueType.concat(typeA, typeB)))
+      comparators.find(isEntryMatched(_, typeA, typeB))
         .map(entry => ((x: Any, y: Any) => doCompare(entry.comparator, x, y)) -> entry)
-        .orElse(comparators.find(isEntryMatched(_, ValueType.concat(typeB, typeA)))
+        .orElse(comparators.find(isEntryMatched(_, typeB, typeA))
           .map(entry => ((x: Any, y: Any) => doCompare(entry.comparator, y, x)) -> entry))
     }
 
-    val _cachedValueComparators = mutable.Map[(String, String, Option[String]), Option[(CompareValueMethod, DomainComparatorEntry)]]();
-    val _cachedSetComparators = mutable.Map[(String, String, Option[String]), Option[(CompareSetMethod, DomainComparatorEntry)]]();
+    val _cachedValueComparators = mutable.Map[(DomainType, DomainType, Option[String]), Option[(CompareValueMethod, DomainComparatorEntry)]]();
+    val _cachedSetComparators = mutable.Map[(DomainType, DomainType, Option[String]), Option[(CompareSetMethod, DomainComparatorEntry)]]();
 
     private def getNotNullValueComparator(a: Any, b: Any, algoName: Option[String]): (CompareValueMethod, DomainComparatorEntry) = {
-      _cachedValueComparators.getOrElseUpdate((ValueType.typeNameOf(a), ValueType.typeNameOf(b), algoName), {
-        val opt = getMatchedComparator(compareValueOrSet = true, ValueType.typeNameOf(a), ValueType.typeNameOf(b), algoName);
+      val typeA = domainTypeNameOf(a)
+      val typeB = domainTypeNameOf(b)
+      _cachedValueComparators.getOrElseUpdate((typeA, typeB, algoName), {
+        val opt = getMatchedComparator(compareValueOrSet = true, typeA, typeB, algoName);
         opt.map((x) => x._1.asInstanceOf[CompareValueMethod] -> x._2)
           .orElse(
-            getMatchedComparator(compareValueOrSet = false, ValueType.typeNameOf(a), ValueType.typeNameOf(b), algoName)
+            getMatchedComparator(compareValueOrSet = false, typeA, typeB, algoName)
               .map(en => asCompareValueMethod(en._1.asInstanceOf[CompareSetMethod]) -> en._2))
       }
-      ).getOrElse(throw new NoSuitableComparatorException(a, b, algoName))
+      ).getOrElse(throw new NoSuitableComparatorException(typeA, typeB, algoName))
     }
 
     private def getNotNullSetComparator(a: Any, b: Any, algoName: Option[String]): (CompareSetMethod, DomainComparatorEntry) = {
-      _cachedSetComparators.getOrElseUpdate((ValueType.typeNameOf(a), ValueType.typeNameOf(b), algoName), {
-        val opt = getMatchedComparator(compareValueOrSet = false, ValueType.typeNameOf(a), ValueType.typeNameOf(b), algoName);
+      val typeA = domainTypeNameOf(a)
+      val typeB = domainTypeNameOf(b)
+      _cachedSetComparators.getOrElseUpdate((typeA, typeB, algoName), {
+        val opt = getMatchedComparator(compareValueOrSet = false, typeA, typeB, algoName);
         opt.map((x) => x._1.asInstanceOf[CompareSetMethod] -> x._2)
           .orElse(
-            getMatchedComparator(compareValueOrSet = true, ValueType.typeNameOf(a), ValueType.typeNameOf(b), algoName)
+            getMatchedComparator(compareValueOrSet = true, typeA, typeB, algoName)
               .map(en => asCompareSetMethod(en._1.asInstanceOf[CompareValueMethod]) -> en._2))
       }
-      ).getOrElse(throw new NoSuitableComparatorException(a, b, algoName))
+      ).getOrElse(throw new NoSuitableComparatorException(typeA, typeB, algoName))
     }
 
     private def asCompareValueMethod(m: CompareSetMethod): CompareValueMethod = {
@@ -244,12 +277,7 @@ class UnknownPropertyException(name: String, x: Any)
 
 }
 
-class NoSuitableComparatorException(a: Any, b: Any, algoName: Option[String])
-  extends RuntimeException(s"no suiltable comparator: ${ValueType.typeNameOf(a)} and ${ValueType.typeNameOf(b)}, algorithm name: ${algoName.getOrElse("(none)")}") {
-
-}
-
-class TooManyObjectsException(o: Any)
-  extends RuntimeException(s"too many objects: $o") {
+class NoSuitableComparatorException(a: DomainType, b: DomainType, algoName: Option[String])
+  extends RuntimeException(s"no suitable comparator: ${a.name()} and ${b.name}, algorithm name: ${algoName.getOrElse("(none)")}") {
 
 }

@@ -1,11 +1,13 @@
 package cn.pandadb.semoplib.common
 
-import cn.pandadb.semop.SubPropertyExtractor
+import cn.pandadb.semop.{DomainType, SemanticExtractor, SubPropertyExtractor}
 import org.neo4j.blob.Blob
 import org.neo4j.blob.util.Configuration
+
 /**
-  * Created by bluejoe on 2019/2/17.
-  */
+ * Created by bluejoe on 2019/2/17.
+ */
+@SemanticExtractor(name = "any", domain = DomainType.Any)
 class AnyPropertyExtractor extends SubPropertyExtractor {
   override def declareProperties() = Map("class" -> classOf[String])
 
@@ -17,6 +19,7 @@ class AnyPropertyExtractor extends SubPropertyExtractor {
   }
 }
 
+@SemanticExtractor(name = "blob", domain = DomainType.BlobAny)
 class AnyBlobPropertyExtractor extends SubPropertyExtractor {
   override def declareProperties() = Map("length" -> classOf[Int], "mime" -> classOf[String])
 

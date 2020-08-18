@@ -1,8 +1,9 @@
 package cn.pandadb.semoplib.text
 
 import cn.pandadb.semoplib.service.ServiceInitializer
-import cn.pandadb.semop.SubPropertyExtractor
+import cn.pandadb.semop.{DomainType, SemanticExtractor, SubPropertyExtractor}
 
+@SemanticExtractor(name = "sentiment", domain = DomainType.String)
 class SentimentClassifier extends SubPropertyExtractor with ServiceInitializer {
 
   override def declareProperties() = Map("sentiment" -> classOf[String])

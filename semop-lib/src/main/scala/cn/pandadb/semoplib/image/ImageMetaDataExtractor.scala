@@ -1,12 +1,14 @@
 package cn.pandadb.semoplib.image
 
-import cn.pandadb.semop.SubPropertyExtractor
+import cn.pandadb.semop.{DomainType, SemanticExtractor, SubPropertyExtractor}
 import javax.imageio.ImageIO
 import org.neo4j.blob.Blob
 import org.neo4j.blob.util.Configuration
+
 /**
-  * Created by bluejoe on 2019/2/17.
-  */
+ * Created by bluejoe on 2019/2/17.
+ */
+@SemanticExtractor(name = "image", domain = DomainType.BlobImage)
 class ImageMetaDataExtractor extends SubPropertyExtractor {
   override def declareProperties() = Map("width" -> classOf[Int], "height" -> classOf[String])
 

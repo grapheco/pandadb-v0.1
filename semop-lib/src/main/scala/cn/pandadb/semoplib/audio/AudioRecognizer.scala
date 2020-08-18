@@ -1,10 +1,11 @@
 package cn.pandadb.semoplib.audio
 
 import cn.pandadb.semoplib.service.ServiceInitializer
-import cn.pandadb.semop.SubPropertyExtractor
+import cn.pandadb.semop.{DomainType, SemanticExtractor, SubPropertyExtractor}
 import org.neo4j.blob.Blob
 
-class AudioRecongnizer extends SubPropertyExtractor with ServiceInitializer {
+@SemanticExtractor(name = "audio", domain = DomainType.BlobAudio)
+class AudioRecognizer extends SubPropertyExtractor with ServiceInitializer {
 
   override def declareProperties() = Map("content" -> classOf[String])
 
@@ -12,5 +13,4 @@ class AudioRecongnizer extends SubPropertyExtractor with ServiceInitializer {
     val content = service.mandarinASR(is)
     Map("content" -> content)
   })
-
 }
