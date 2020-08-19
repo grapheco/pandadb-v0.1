@@ -3,6 +3,7 @@ package cn.pandadb.semop;
 public enum DomainType {
     Any("*"),
     String("string"),
+    Number("number"),
     BlobAny("blob/*"),
     BlobImage("blob/image"),
     BlobAudio("blob/audio"),

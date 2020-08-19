@@ -91,6 +91,10 @@ class CypherPluginRegistry(conf: Configuration) extends Logging {
       case "audio" => DomainType.BlobAudio
     }
     case _: String => DomainType.String
+    case _: Int => DomainType.Number
+    case _: Double => DomainType.Number
+    case _: Float => DomainType.Number
+    case _: Long => DomainType.Number
   }
 
   def createCustomPropertyProvider() = new CustomPropertyProvider {

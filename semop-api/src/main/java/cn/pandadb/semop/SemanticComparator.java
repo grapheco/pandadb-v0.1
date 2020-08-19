@@ -8,6 +8,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SemanticComparator {
     String name();
+
     DomainType[] domains();
+
     double threshold() default 0.7;
 }
