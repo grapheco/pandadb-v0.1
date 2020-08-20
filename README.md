@@ -15,6 +15,7 @@
 * 4. [developers' manual](#developersmanual)
 	* 4.1. [connecting remote PandaDB](#connectingremotePandaDB)
 	* 4.2. [using an embedded GraphDB](#usinganembeddedGraphDB)
+* 5. [Licensing](#Licensing)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -307,5 +308,5 @@ If you are used to `CypherService`, you may try the method `LocalGraphService.co
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-# Licensing
+##  5. <a name='Licensing'></a>Licensing
 PandaDB v0.1 is an open source product licensed under GPLv3.
