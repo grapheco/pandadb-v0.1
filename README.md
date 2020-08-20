@@ -128,7 +128,7 @@ Next code illustrates how to use blob in Cypher query:
 return <https://bluejoe2008.github.io/bluejoe3.png>
 ```
 
-more details, see https://github.com/bluejoe2008/pandadb-v0.1/blob/docs/blob.md
+more details, see https://github.com/grapheco/pandadb-v0.1/blob/master/docs/blob.md
 
 ### <a name='propertyextration'></a>property extration
 
