@@ -13,27 +13,50 @@ Intelligent Graph Database (import from GraiphDB https://github.com/grapheco/gra
 
 ## <a name='BuildingPandaDB'></a>Building PandaDB
 
+### install all artifacts
+
 ```
 mvn clean install
 ```
 
-this will install all artifacts in local maven repository.
+### building server-side distribution zip package
+```
+cd packaging
+mvn package -Pserver-unix-dist
+```
+
+or
+
+```
+cd packaging
+mvn package -Pserver-win-dist
+```
+
+this command will create `pandadb-server-<version>.tgz` or `pandadb-server-<version>.zip` in `target` directory.
+
+### building server-side all-in-one jar package
+```
+cd packaging
+mvn package -Pserver-jar
+```
+
+this command will create `pandadb-server-all-in-one-<version>.jar` in `target` directory.
 
 ## <a name='Quickstart'></a>Quick start
 
 ### <a name='STEP1.downloadpackage'></a>STEP 1. download package
 visit https://github.com/grapheco/pandadb-v0.1/releases to get pandadb-v0.1 binary distributions.
 
-unpack `pandadb-server-x.x.zip` in your local directory, e.g. `/usr/local/`.
+unpack `pandadb-server-<version>.zip` in your local directory, e.g. `/usr/local/`.
 
-`cd /usr/local/pandadb-server-x.x`
+`cd /usr/local/pandadb-server-<version>`
 
 ### <a name='STEP2.startserver'></a>STEP 2. start server
 
 * `bin/neo4j console`: start a PandaDB server
 * `bin/neo4j start`: start a PandaDB server silently
 
-Once successfully startup, infos will be shown as below:
+Once PandaDB is successfully startup, infos will be shown as below:
 
 ```
 2020-08-08 04:20:51.309+0000 INFO  ======== PandaDB (+Neo4j-3.5.6-BLOB) ======== 
@@ -70,7 +93,7 @@ Also, you may visit `http://localhost:7474`  to browse graph data in `neo4j-brow
 
 ### <a name='STEP4.queryingOnPandaDB'></a>STEP 4. querying on PandaDB
 
-in `neo4j-browser`, users may input `Cypher` commands to query on GraiphDB.
+in `neo4j-browser`, users may input `Cypher` commands to query on PandaDB.
 
 ```
 create (bluejoe:Person {name: 'bluejoe', mail:'bluejoe2008@gmail.com', photo: <https://bluejoe2008.github.io/p4.png>}) return bluejoe
@@ -105,7 +128,7 @@ Next code illustrates how to use blob in Cypher query:
 return <https://bluejoe2008.github.io/bluejoe3.png>
 ```
 
-more details, see https://github.com/bluejoe2008/graiph-neo4j/blob/cypher-extension/README.md
+more details, see https://github.com/bluejoe2008/pandadb-v0.1/blob/docs/blob.md
 
 ### <a name='propertyextration'></a>property extration
 
@@ -165,11 +188,21 @@ import `pandadb:connector` dependency first:
       <version>0.1.0-SNAPSHOT</version>
    </dependency>
 ```
-use object `RemotePandaServer.connect()`:
+
+use `GraphDatabase.driver()` to connect remote PandaDB, just like using neo4j:
+```
+  val _driver = GraphDatabase.driver(url, AuthTokens.basic(user, pass));
+  val session = _driver.session()
+  val result = session...
+  session.close();
+  ...
+```
+    
+An alternative way is to use `RemotePandaServer.connect()`:
 
 * def connect(url: String, user: String = "", pass: String = ""): CypherService
 
-`CypherService` has a set of methods:
+it returns a `CypherService` which has a set of methods:
 * def queryObjects[T: ClassTag](queryString: String, fnMap: (Record => T)): Iterator[T]
 
 * def queryObjects[T: ClassTag](queryString: String, params: Map[String, AnyRef], fnMap: (Record => T)): Iterator[T]
@@ -191,15 +224,14 @@ use object `RemotePandaServer.connect()`:
 A simple example:
 ```
     val conn = RemotePandaServer.connect("bolt://localhost:7687", "neo4j", "123");
-    //a non-blob
-    val (node, name, age) = conn.querySingleObject("match (n) where n.name='bob' return n, n.name, n.age", (result: Record) => {
-      (result.get("n").asNode(), result.get("n.name").asString(), result.get("n.age").asInt())
+    val (node, name, age, photo) = conn.querySingleObject("match (n) where n.name='bob' return n, n.name, n.age", (result: Record) => {
+      (result.get("n").asNode(), result.get("n.name").asString(), result.get("n.age").asInt(), result.get("n.photo").asBlob())
     });
 ```
 
-more example code, see https://github.com/grapheco/graiph-dist/tree/master/graiph-client-test
+more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-### <a name='usingembeddeddatabase'></a>using embedded GraphDB
+### <a name='usingembeddeddatabase'></a>using an embedded GraphDB
 
 import `pandadb:database` dependency first:
 
@@ -211,7 +243,16 @@ import `pandadb:database` dependency first:
    </dependency>
 ```
 
-using object `PandaDB`:
+use `GraphDatabase.driver()` to connect local PandaDB, just like using neo4j:
+
+```
+  val builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbDir);
+  ...
+  val db = builder.newGraphDatabase();
+  val tx = db.beginTx();
+  ...
+```
+An alternative way is to use object `PandaDB`:
 
 * def openDatabase(dbDir: File, propertiesFile: File): GraphDatabaseService
 
@@ -230,7 +271,7 @@ An example of `openDatabase`:
    ...
 ```
 
-An example of `connect`:
+If you are used to `CypherService`, you may try the method `LocalGraphService.connect()`:
 ```
    val db = PandaDB.openDatabase(new File("./testdb"), new File("./neo4j.conf"));
    val conn = LocalGraphService.connect(db);
@@ -241,13 +282,7 @@ An example of `connect`:
 ```
 `LocalGraphService.connect()` returns a `CypherService` too, just like that of `RemotePandaServer.connect()`.
 
-more example code, see https://github.com/grapheco/graiph-dist/tree/master/graiph-database-test
-
-## <a name='handlingBLOBs'></a>handling BLOBs
-
-graiph-neo4j enhances Neo4j with a set of blob operation functions which makes it possible and convenient to store and use the BLOB in neo4j.
-
-more details, see https://github.com/bluejoe2008/graiph-neo4j/blob/cypher-extension/blob.md
+more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
 # Licensing
 PandaDB v0.1 is an open source product licensed under GPLv3.
