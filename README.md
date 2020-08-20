@@ -1,3 +1,26 @@
+<!-- vscode-markdown-toc -->
+* 1. [Building PandaDB](#BuildingPandaDB)
+	* 1.1. [install all artifacts](#installallartifacts)
+	* 1.2. [building server-side distribution zip package](#buildingserver-sidedistributionzippackage)
+	* 1.3. [building server-side all-in-one jar package](#buildingserver-sideall-in-onejarpackage)
+* 2. [Quick start](#Quickstart)
+	* 2.1. [STEP 1. download package](#STEP1.downloadpackage)
+	* 2.2. [STEP 2. start server](#STEP2.startserver)
+	* 2.3. [STEP 3. connect remote PandaDB](#STEP3.connectremotePandaDB)
+	* 2.4. [STEP 4. querying on PandaDB](#STEP4.queryingonPandaDB)
+* 3. [CypherPlus](#CypherPlus)
+	* 3.1. [BLOB literals](#BLOBliterals)
+	* 3.2. [property extration](#propertyextration)
+	* 3.3. [semantic comparison](#semanticcomparison)
+* 4. [developers' manual](#developersmanual)
+	* 4.1. [connecting remote PandaDB](#connectingremotePandaDB)
+	* 4.2. [using an embedded GraphDB](#usinganembeddedGraphDB)
+
+<!-- vscode-markdown-toc-config
+	numbering=true
+	autoSave=true
+	/vscode-markdown-toc-config -->
+<!-- /vscode-markdown-toc -->
 # PandaDB v0.1
 Intelligent Graph Database (import from GraiphDB https://github.com/grapheco/graiphdb)
 
@@ -11,15 +34,15 @@ Intelligent Graph Database (import from GraiphDB https://github.com/grapheco/gra
 * intelligent property graph model
 * cypher plus
 
-## <a name='BuildingPandaDB'></a>Building PandaDB
+##  1. <a name='BuildingPandaDB'></a>Building PandaDB
 
-### install all artifacts
+###  1.1. <a name='installallartifacts'></a>install all artifacts
 
 ```
 mvn clean install
 ```
 
-### building server-side distribution zip package
+###  1.2. <a name='buildingserver-sidedistributionzippackage'></a>building server-side distribution zip package
 ```
 cd packaging
 mvn package -Pserver-unix-dist
@@ -34,7 +57,7 @@ mvn package -Pserver-win-dist
 
 this command will create `pandadb-server-<version>.tgz` or `pandadb-server-<version>.zip` in `target` directory.
 
-### building server-side all-in-one jar package
+###  1.3. <a name='buildingserver-sideall-in-onejarpackage'></a>building server-side all-in-one jar package
 ```
 cd packaging
 mvn package -Pserver-jar
@@ -42,16 +65,16 @@ mvn package -Pserver-jar
 
 this command will create `pandadb-server-all-in-one-<version>.jar` in `target` directory.
 
-## <a name='Quickstart'></a>Quick start
+##  2. <a name='Quickstart'></a>Quick start
 
-### <a name='STEP1.downloadpackage'></a>STEP 1. download package
+###  2.1. <a name='STEP1.downloadpackage'></a>STEP 1. download package
 visit https://github.com/grapheco/pandadb-v0.1/releases to get pandadb-v0.1 binary distributions.
 
 unpack `pandadb-server-<version>.zip` in your local directory, e.g. `/usr/local/`.
 
 `cd /usr/local/pandadb-server-<version>`
 
-### <a name='STEP2.startserver'></a>STEP 2. start server
+###  2.2. <a name='STEP2.startserver'></a>STEP 2. start server
 
 * `bin/neo4j console`: start a PandaDB server
 * `bin/neo4j start`: start a PandaDB server silently
@@ -83,7 +106,7 @@ PandaDB Server (ver 0.1.0.20200801)
 2020-08-08 04:20:56.224+0000 INFO  Remote interface available at http://localhost:7474/
 ```
 
-### <a name='STEP3.connectPandaDBServer'></a>STEP 3. connect remote PandaDB
+###  2.3. <a name='STEP3.connectremotePandaDB'></a>STEP 3. connect remote PandaDB
 
 clients communicate with PandaDB via `Cypher` over Bolt protocol.
 
@@ -91,7 +114,7 @@ clients communicate with PandaDB via `Cypher` over Bolt protocol.
 
 Also, you may visit `http://localhost:7474`  to browse graph data in `neo4j-browser`.
 
-### <a name='STEP4.queryingOnPandaDB'></a>STEP 4. querying on PandaDB
+###  2.4. <a name='STEP4.queryingonPandaDB'></a>STEP 4. querying on PandaDB
 
 in `neo4j-browser`, users may input `Cypher` commands to query on PandaDB.
 
@@ -107,11 +130,11 @@ in `neo4j-browser`, a BLOB property will be displayed as an image icon:
 
 NOTE: if user/password is required, try default values: `neo4j`/`neo4j`.
 
-## <a name='CypherPlus'></a>CypherPlus
+##  3. <a name='CypherPlus'></a>CypherPlus
 
 PandaDB enhances `Cypher` grammar, naming CypherPlus. CypherPlus allows writing BLOB literals in query commands, also it allows semantic operations on properties, especially BLOB properties.
 
-### <a name='BLOBliterals'></a>BLOB literals
+###  3.1. <a name='BLOBliterals'></a>BLOB literals
 
 `BlobLiteral` is defined in Cypher grammar in form of:
 `<schema://path>`
@@ -130,7 +153,7 @@ return <https://bluejoe2008.github.io/bluejoe3.png>
 
 more details, see https://github.com/grapheco/pandadb-v0.1/blob/master/docs/blob.md
 
-### <a name='propertyextration'></a>property extration
+###  3.2. <a name='propertyextration'></a>property extration
 
 ```
 neo4j@<default_database>> match (n {name:'bluejoe'}) return n.photo->mime, n.car->width;
@@ -157,7 +180,7 @@ neo4j@<default_database>> match (n {name:'bluejoe'}) return n.car->plateNumber;
 Failed connect to http://10.0.86.128:8081
 ```
 
-### <a name='semanticcomparison'></a>semantic comparison
+###  3.3. <a name='semanticcomparison'></a>semantic comparison
 
 CypherPlus allows semantic comparison on two properties.
 
@@ -177,8 +200,8 @@ A good idea is to determine if a person appear in another photo:
 return <http://s12.sinaimg.cn/mw690/005AE7Quzy7rL8kA4Nt6b&690> ~:0.5 <http://s15.sinaimg.cn/mw690/005AE7Quzy7rL8j2jlIee&690>
 ```
 
-## <a name='developersmanual'></a>developers' manual
-### <a name='connectingremotePandaDB'></a>connecting remote PandaDB
+##  4. <a name='developersmanual'></a>developers' manual
+###  4.1. <a name='connectingremotePandaDB'></a>connecting remote PandaDB
 
 import `pandadb:connector` dependency first:
 ```
@@ -231,7 +254,7 @@ A simple example:
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-### <a name='usingembeddeddatabase'></a>using an embedded GraphDB
+###  4.2. <a name='usinganembeddedGraphDB'></a>using an embedded GraphDB
 
 import `pandadb:database` dependency first:
 
