@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+  <id>unix</id>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/distribution/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>**/*.bat</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/distribution/conf</directory>
+            <outputDirectory>conf</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/distribution/logs</directory>
+            <outputDirectory>logs</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/unix/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>**/.keep</exclude>
+            </excludes>
+            <includes>
+                <include>**/*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>README.txt</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+<!--  <fileSets>-->
+<!--    &lt;!&ndash; filter plain text &ndash;&gt;-->
+<!--    <fileSet>-->
+<!--      <directory>src/main/distribution</directory>-->
+<!--      <outputDirectory/>-->
+<!--      <lineEnding>keep</lineEnding>-->
+<!--      <filtered>true</filtered>-->
+<!--      <directoryMode>0755</directoryMode>-->
+<!--      <fileMode>0755</fileMode>-->
+<!--      <excludes>-->
+<!--        <exclude>**/.keep</exclude>-->
+<!--        <exclude>**/*.bat</exclude>-->
+<!--        <exclude>**/*.m4</exclude>-->
+<!--        <exclude>**/*.psd1</exclude>-->
+<!--        <exclude>**/*.psm1</exclude>-->
+<!--        <exclude>**/*.ps1</exclude>-->
+<!--        <exclude>**/Pandadb-Management</exclude>-->
+<!--        <exclude>**/*.exe</exclude>-->
+<!--      </excludes>-->
+<!--    </fileSet>-->
+<!--    &lt;!&ndash; filter and chmod 755 shell scripts &ndash;&gt;-->
+<!--    &lt;!&ndash; filter m4 scripts&ndash;&gt;-->
+<!--    <fileSet>-->
+<!--      <directory>${project.parent.basedir}/src/main/distribution</directory>-->
+<!--      <outputDirectory/>-->
+<!--      <lineEnding>unix</lineEnding>-->
+<!--      <fileMode>0755</fileMode>-->
+<!--      <excludes>-->
+<!--        <exclude>**/*.bat</exclude>-->
+<!--        <exclude>**/*.m4</exclude>-->
+<!--        <exclude>**/*.psd1</exclude>-->
+<!--        <exclude>**/*.psm1</exclude>-->
+<!--        <exclude>**/*.ps1</exclude>-->
+<!--        <exclude>**/Pandadb-Management</exclude>-->
+<!--        <exclude>**/*.exe</exclude>-->
+<!--      </excludes>-->
+<!--      <filtered>true</filtered>-->
+<!--    </fileSet>-->
+<!--    &lt;!&ndash; filter and chmod 755 cypher-shell &ndash;&gt;-->
+<!--      <fileSet>-->
+<!--          <directory>${project.parent.basedir}/src/main/distribution</directory>-->
+<!--          <outputDirectory/>-->
+<!--          <includes>-->
+<!--              <include>**/cypher-shell.jar</include>-->
+<!--          </includes>-->
+<!--      </fileSet>-->
+
+<!--      <fileSet>-->
+<!--          <directory>${project.parent.basedir}/src/standalone</directory>-->
+<!--          <outputDirectory>bin</outputDirectory>-->
+<!--          <lineEnding>keep</lineEnding>-->
+<!--          <fileMode>0755</fileMode>-->
+<!--          <includes>-->
+<!--              <include>**/cypher-shell.jar</include>-->
+<!--          </includes>-->
+<!--      </fileSet>-->
+
+<!--      <fileSet>-->
+<!--          <directory>${project.parent.basedir}/src/main/distribution/tools</directory>-->
+<!--          <outputDirectory>bin</outputDirectory>-->
+<!--          <lineEnding>keep</lineEnding>-->
+<!--          <fileMode>0755</fileMode>-->
+<!--          <excludes>-->
+<!--              <exclude>**/*.bat</exclude>-->
+<!--          </excludes>-->
+<!--      </fileSet>-->
+
+<!--      <fileSet>-->
+<!--          <directory>${project.parent.basedir}/src/main/resources</directory>-->
+<!--          <outputDirectory>lib</outputDirectory>-->
+<!--          <lineEnding>keep</lineEnding>-->
+<!--          <fileMode>0755</fileMode>-->
+<!--          <includes>-->
+<!--              <include>**/cypher-shell.jar</include>-->
+<!--          </includes>-->
+<!--      </fileSet>-->
+
+<!--    <fileSet>-->
+<!--      <directory>${project.parent.basedir}/src/main/distribution</directory>-->
+<!--      <outputDirectory>labs</outputDirectory>-->
+<!--      <includes>-->
+<!--        <include>apoc*.jar</include>-->
+<!--      </includes>-->
+<!--    </fileSet>-->
+<!--    &lt;!&ndash; TODO: temporary workaround for browser dependency &ndash;&gt;-->
+
+<!--  </fileSets>-->
+<!--  <dependencySets>-->
+<!--    <dependencySet>-->
+<!--      <outputDirectory>lib</outputDirectory>-->
+<!--      <directoryMode>0755</directoryMode>-->
+<!--      <fileMode>0755</fileMode>-->
+<!--      <unpack>false</unpack>-->
+<!--      <useProjectArtifact>false</useProjectArtifact>-->
+<!--      <useStrictFiltering>true</useStrictFiltering>-->
+<!--      <excludes>-->
+<!--        <exclude>org.ow2.asm:*</exclude>-->
+<!--      </excludes>-->
+<!--    </dependencySet>-->
+<!-- </dependencySets>-->
+</assembly>
