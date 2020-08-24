@@ -310,7 +310,7 @@ more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/ites
 
 ## 5. TODO
 
-* batch import
+* batch import (spi: org.neo4j.unsafe.impl.batchimport.BatchImporterFactory)
 * blob group
 
 ##  6. <a name='Licensing'></a>Licensing
