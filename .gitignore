@@ -3,6 +3,5 @@
 .idea/
 *.iml
 target/
-bin/
 testoutput/
 *.plantuml
