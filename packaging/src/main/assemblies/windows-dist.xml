@@ -7,75 +7,40 @@
     <format>zip</format>
   </formats>
   <fileSets>
-    <!-- filter plain text -->
     <fileSet>
-      <directory>src/main/distribution</directory>
-      <outputDirectory/>
-      <lineEnding>dos</lineEnding>
-      <filtered>true</filtered>
-      <excludes>
-        <exclude>**/.keep</exclude>
-        <exclude>**/*.m4</exclude>
-        <exclude>**/*.sh</exclude>
-        <exclude>**/*.formatted</exclude>
-      </excludes>
-      <includes>
-        <include>**/*.bat</include>
-        <include>**/*.psd1</include>
-        <include>**/*.psm1</include>
-        <include>**/*.ps1</include>
-      </includes>
-    </fileSet>
-
-    <!-- filter text files -->
-    <fileSet>
-      <directory>${project.parent.basedir}/src/main/distribution</directory>
-      <outputDirectory/>
-      <lineEnding>dos</lineEnding>
-      <includes>
-        <include>**/*.bat</include>
-        <include>**/*.psd1</include>
-        <include>**/*.psm1</include>
-        <include>**/*.ps1</include>
-      </includes>
-      <excludes>
-        <exclude>**/*.m4</exclude>
-      </excludes>
-      <filtered>true</filtered>
-    </fileSet>
-    <!-- cypher-shell -->
-    <fileSet>
-      <directory>${project.parent.basedir}/src/main/distribution/cypher-shell</directory>
+      <directory>src/main/distribution/bin</directory>
       <outputDirectory>bin</outputDirectory>
-      <lineEnding>dos</lineEnding>
+      <directoryMode>0755</directoryMode>
+      <fileMode>0755</fileMode>
       <includes>
-        <include>*.bat</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <directory>${project.parent.basedir}/src/main/distribution/cypher-shell</directory>
-      <outputDirectory>bin/tools</outputDirectory>
-      <includes>
+        <include>**/*.bat</include>
         <include>**/*.jar</include>
       </includes>
     </fileSet>
-
     <fileSet>
-      <directory>${project.parent.basedir}/src/main/distribution/</directory>
-      <outputDirectory>labs</outputDirectory>
-      <includes>
-        <include>apoc*.jar</include>
-      </includes>
+      <directory>src/main/distribution/conf</directory>
+      <outputDirectory>conf</outputDirectory>
+      <directoryMode>0755</directoryMode>
+      <fileMode>0755</fileMode>
     </fileSet>
-    <!-- TODO: temporary workaround for browser dependency -->
+    <fileSet>
+      <directory>src/main/distribution/logs</directory>
+      <outputDirectory>logs</outputDirectory>
+      <directoryMode>0755</directoryMode>
+      <fileMode>0755</fileMode>
+    </fileSet>
     <fileSet>
       <directory>${project.build.directory}/win/lib</directory>
-      <outputDirectory>./lib</outputDirectory>
+      <outputDirectory>lib</outputDirectory>
+      <directoryMode>0755</directoryMode>
+      <fileMode>0755</fileMode>
+      <excludes>
+        <exclude>**/.keep</exclude>
+      </excludes>
       <includes>
         <include>**/*.jar</include>
       </includes>
     </fileSet>
-
     <fileSet>
       <outputDirectory>/</outputDirectory>
       <includes>
@@ -83,6 +48,83 @@
       </includes>
     </fileSet>
   </fileSets>
+<!--  <fileSets>-->
+<!--    &lt;!&ndash; filter plain text &ndash;&gt;-->
+<!--    <fileSet>-->
+<!--      <directory>src/main/distribution</directory>-->
+<!--      <outputDirectory/>-->
+<!--      <lineEnding>dos</lineEnding>-->
+<!--      <filtered>true</filtered>-->
+<!--      <excludes>-->
+<!--        <exclude>**/.keep</exclude>-->
+<!--        <exclude>**/*.m4</exclude>-->
+<!--        <exclude>**/*.sh</exclude>-->
+<!--        <exclude>**/*.formatted</exclude>-->
+<!--      </excludes>-->
+<!--      <includes>-->
+<!--        <include>**/*.bat</include>-->
+<!--        <include>**/*.psd1</include>-->
+<!--        <include>**/*.psm1</include>-->
+<!--        <include>**/*.ps1</include>-->
+<!--      </includes>-->
+<!--    </fileSet>-->
+
+<!--    &lt;!&ndash; filter text files &ndash;&gt;-->
+<!--    <fileSet>-->
+<!--      <directory>${project.parent.basedir}/src/main/distribution</directory>-->
+<!--      <outputDirectory/>-->
+<!--      <lineEnding>dos</lineEnding>-->
+<!--      <includes>-->
+<!--        <include>**/*.bat</include>-->
+<!--        <include>**/*.psd1</include>-->
+<!--        <include>**/*.psm1</include>-->
+<!--        <include>**/*.ps1</include>-->
+<!--      </includes>-->
+<!--      <excludes>-->
+<!--        <exclude>**/*.m4</exclude>-->
+<!--      </excludes>-->
+<!--      <filtered>true</filtered>-->
+<!--    </fileSet>-->
+<!--    &lt;!&ndash; cypher-shell &ndash;&gt;-->
+<!--    <fileSet>-->
+<!--      <directory>${project.parent.basedir}/src/main/distribution/cypher-shell</directory>-->
+<!--      <outputDirectory>bin</outputDirectory>-->
+<!--      <lineEnding>dos</lineEnding>-->
+<!--      <includes>-->
+<!--        <include>*.bat</include>-->
+<!--      </includes>-->
+<!--    </fileSet>-->
+<!--    <fileSet>-->
+<!--      <directory>${project.parent.basedir}/src/main/distribution/cypher-shell</directory>-->
+<!--      <outputDirectory>bin/tools</outputDirectory>-->
+<!--      <includes>-->
+<!--        <include>**/*.jar</include>-->
+<!--      </includes>-->
+<!--    </fileSet>-->
+
+<!--    <fileSet>-->
+<!--      <directory>${project.parent.basedir}/src/main/distribution/</directory>-->
+<!--      <outputDirectory>labs</outputDirectory>-->
+<!--      <includes>-->
+<!--        <include>apoc*.jar</include>-->
+<!--      </includes>-->
+<!--    </fileSet>-->
+<!--    &lt;!&ndash; TODO: temporary workaround for browser dependency &ndash;&gt;-->
+<!--    <fileSet>-->
+<!--      <directory>${project.build.directory}/win/lib</directory>-->
+<!--      <outputDirectory>./lib</outputDirectory>-->
+<!--      <includes>-->
+<!--        <include>**/*.jar</include>-->
+<!--      </includes>-->
+<!--    </fileSet>-->
+
+<!--    <fileSet>-->
+<!--      <outputDirectory>/</outputDirectory>-->
+<!--      <includes>-->
+<!--        <include>README.txt</include>-->
+<!--      </includes>-->
+<!--    </fileSet>-->
+<!--  </fileSets>-->
 <!--  <dependencySets>-->
 <!--    <dependencySet>-->
 <!--      <outputDirectory>lib</outputDirectory>-->
