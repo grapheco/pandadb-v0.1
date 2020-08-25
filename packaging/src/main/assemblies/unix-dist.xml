@@ -24,6 +24,15 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>src/main/distribution</directory>
+            <outputDirectory/>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>README.md</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>src/main/distribution/logs</directory>
             <outputDirectory>logs</outputDirectory>
             <directoryMode>0755</directoryMode>
