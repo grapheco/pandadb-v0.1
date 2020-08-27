@@ -29,6 +29,7 @@ class TestBase {
       //with a blob property
       node1.setProperty("photo", BlobFactory.fromFile(new File("./testinput/ai/test.png")));
       //blob array
+      node1.setProperty("memo", (0 to 2).map(x => BlobFactory.fromFile(new File("./testinput/ai/test.txt"))).toArray);
       node1.setProperty("photo2", (0 to 1).map(x => BlobFactory.fromFile(new File("./testinput/ai/test.png"))).toArray);
 
       val node2 = db.createNode();
