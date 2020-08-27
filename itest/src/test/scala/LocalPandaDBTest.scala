@@ -21,11 +21,11 @@ class LocalPandaDBTest extends TestBase {
     val v2: Node = it.next();
 
     println(v1.getAllProperties);
-    Assert.assertEquals(5, v1.getAllProperties.size());
+    Assert.assertEquals(6, v1.getAllProperties.size());
 
-    val blob = v1.getProperty("photo").asInstanceOf[Blob];
+    val photo = v1.getProperty("photo").asInstanceOf[Blob];
     Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-      blob.offerStream {
+      photo.offerStream {
         IOUtils.toByteArray(_)
       });
 
@@ -33,20 +33,67 @@ class LocalPandaDBTest extends TestBase {
       v1.getProperty("bytes").asInstanceOf[Array[Byte]]);
 
     //test array[blob]
-    val blob2 = v1.getProperty("photo2").asInstanceOf[Array[Blob]];
-    Assert.assertEquals(2, blob2.length);
+    val memo = v1.getProperty("memo").asInstanceOf[Array[Blob]];
+    Assert.assertEquals(3, memo.length);
+    Assert.assertEquals(IOUtils.toString(new FileInputStream(new File("./testinput/ai/test.txt"))),
+      memo(0).offerStream {
+        IOUtils.toString(_)
+      })
+
+    Assert.assertEquals(IOUtils.toString(new FileInputStream(new File("./testinput/ai/test.txt"))),
+      memo(1).offerStream {
+        IOUtils.toString(_)
+      })
+
+    Assert.assertEquals(IOUtils.toString(new FileInputStream(new File("./testinput/ai/test.txt"))),
+      memo(2).offerStream {
+        IOUtils.toString(_)
+      })
+
+    val photos = v1.getProperty("photo2").asInstanceOf[Array[Blob]];
+    Assert.assertEquals(2, photos.length);
     Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-      blob2(0).offerStream {
+      photos(0).offerStream {
         IOUtils.toByteArray(_)
       });
 
     Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))),
-      blob2(1).offerStream {
+      photos(1).offerStream {
         IOUtils.toByteArray(_)
       });
 
     //delete one
     v1.removeProperty("photo");
+    //photo will be deleted
+    try {
+      photo.offerStream(_.read())
+      Assert.assertTrue(false)
+    }
+    catch {
+      case _=>
+        Assert.assertTrue(true)
+    }
+
+    v1.removeProperty("memo")
+    try {
+      memo(0).offerStream(_.read())
+      Assert.assertTrue(false)
+    }
+    catch {
+      case _=>
+        Assert.assertTrue(true)
+    }
+
+    v1.removeProperty("photos");
+    try {
+      photos(0).offerStream(_.read())
+      Assert.assertTrue(false)
+    }
+    catch {
+      case _=>
+        Assert.assertTrue(true)
+    }
+
     v2.delete();
 
     val it2 = db2.getAllNodes().iterator();
@@ -54,7 +101,8 @@ class LocalPandaDBTest extends TestBase {
     Assert.assertEquals(false, it2.hasNext);
 
     tx2.success();
-    tx2.close();
+    tx2.close()
+    //TODO: OnlineIndexUpdates will fail on load deleted blob value!
     db2.shutdown();
   }
 
