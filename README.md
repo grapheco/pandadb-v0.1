@@ -308,5 +308,10 @@ If you are used to `CypherService`, you may try the method `LocalGraphService.co
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-##  5. <a name='Licensing'></a>Licensing
+## 5. TODO
+
+* batch import (spi: org.neo4j.unsafe.impl.batchimport.BatchImporterFactory)
+* blob group
+
+##  6. <a name='Licensing'></a>Licensing
 PandaDB v0.1 is an open source product licensed under GPLv3.
