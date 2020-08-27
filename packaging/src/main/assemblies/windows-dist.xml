@@ -14,8 +14,14 @@
       <fileMode>0755</fileMode>
       <includes>
         <include>**/*.bat</include>
-        <include>**/*.jar</include>
+        <include>**/*.psd1</include>
+        <include>**/*.psm1</include>
+        <include>**/*.ps1</include>
       </includes>
+      <excludes>
+        <exclude>**/neo4j-backup*</exclude>
+        <exclude>**/*.m4</exclude>
+      </excludes>
     </fileSet>
     <fileSet>
       <directory>src/main/distribution/conf</directory>
@@ -30,15 +36,6 @@
       <fileMode>0755</fileMode>
     </fileSet>
     <fileSet>
-      <directory>src/main/distribution</directory>
-      <outputDirectory/>
-      <directoryMode>0755</directoryMode>
-      <fileMode>0755</fileMode>
-      <includes>
-        <include>README.md</include>
-      </includes>
-    </fileSet>
-    <fileSet>
       <directory>${project.build.directory}/win/lib</directory>
       <outputDirectory>lib</outputDirectory>
       <directoryMode>0755</directoryMode>
@@ -47,13 +44,16 @@
         <exclude>**/.keep</exclude>
       </excludes>
       <includes>
-        <include>**/*.jar</include>
+        <include>pandadb-dist-0.1.0-SNAPSHOT.jar</include>
       </includes>
     </fileSet>
     <fileSet>
-      <outputDirectory>/</outputDirectory>
+      <directory>src/main/distribution</directory>
+      <outputDirectory/>
+      <directoryMode>0755</directoryMode>
+      <fileMode>0755</fileMode>
       <includes>
-        <include>README.txt</include>
+        <include>README.md</include>
       </includes>
     </fileSet>
   </fileSets>
