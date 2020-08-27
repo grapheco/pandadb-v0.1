@@ -15,7 +15,6 @@ set NEO4J_HOME=%DIRNAME%..
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and CYPHER_SHELL_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS=
-
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 
@@ -70,11 +69,10 @@ set CMD_LINE_ARGS=%$
 @rem Setup the command line
 
 SETLOCAL EnableDelayedExpansion
-SET CYPHER_SHELL_JAR=
-FOR /f "delims=" %%a in ('dir "tools\cypher-shell.jar" /s/b') do set CYPHER_SHELL_JAR=!CYPHER_SHELL_JAR!%%a
-
+set CYPHER_SHELL_JAR="..\lib\pandadb-dist-0.1.0-SNAPSHOT.jar"
+set MAIN_CLASS="org.neo4j.shell.Main"
 @rem Execute cypher-shell
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %CYPHER_SHELL_OPTS%  -jar "%CYPHER_SHELL_JAR%" %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% -cp "%CYPHER_SHELL_JAR%" %MAIN_CLASS%
 
 :end
 @rem End local scope for the variables with windows NT shell
