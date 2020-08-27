@@ -22,6 +22,7 @@
                 <exclude>**/*.ps1</exclude>
                 <exclude>**/Neo4j-Management</exclude>
                 <exclude>**/*.exe</exclude>
+                <exclude>**/*.jar</exclude>
             </excludes>
         </fileSet>
         <fileSet>

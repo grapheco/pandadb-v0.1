@@ -21,6 +21,7 @@
       <excludes>
         <exclude>**/neo4j-backup*</exclude>
         <exclude>**/*.m4</exclude>
+        <exclude>**/*.jar</exclude>
       </excludes>
     </fileSet>
     <fileSet>
