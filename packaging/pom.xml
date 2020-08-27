@@ -21,7 +21,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
                         <configuration>
-                            <finalName>pandadb-server-all-in-one-${project.parent.version}</finalName>
+                            <finalName>pandadb-dist-${project.parent.version}</finalName>
                             <artifactSet>
                                 <includes>
                                     <include>*:*</include>
@@ -84,7 +84,13 @@
                     <groupId>org.scala-lang</groupId>
                     <artifactId>scala-library</artifactId>
                 </dependency>
+                <dependency>
+                    <groupId>org.neo4j.shell</groupId>
+                    <artifactId>cypher-shell</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                </dependency>
             </dependencies>
+
         </profile>
 
         <profile>
@@ -96,7 +102,7 @@
                         <artifactId>maven-shade-plugin</artifactId>
                         <version>3.2.1</version>
                         <configuration>
-                            <finalName>pandadb-server-all-in-one-${project.parent.version}</finalName>
+                            <finalName>pandadb-dist-${project.parent.version}</finalName>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <artifactSet>
@@ -111,7 +117,6 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
-                                        <exclude>cypher-shell.jar</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -205,6 +210,11 @@
                     <groupId>org.scala-lang</groupId>
                     <artifactId>scala-library</artifactId>
                 </dependency>
+                <dependency>
+                    <groupId>org.neo4j.shell</groupId>
+                    <artifactId>cypher-shell</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                </dependency>
             </dependencies>
         </profile>
 
@@ -217,7 +227,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
                         <configuration>
-                            <finalName>pandadb-server-all-in-one-${project.parent.version}</finalName>
+                            <finalName>pandadb-dist-${project.parent.version}</finalName>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <artifactSet>
@@ -316,8 +326,11 @@
                     <groupId>org.scala-lang</groupId>
                     <artifactId>scala-library</artifactId>
                 </dependency>
-
-
+                <dependency>
+                    <groupId>org.neo4j.shell</groupId>
+                    <artifactId>cypher-shell</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                </dependency>
             </dependencies>
         </profile>
 
@@ -329,7 +342,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
                         <configuration>
-                            <shadedClassifierName></shadedClassifierName>
                             <!--                            <shadedArtifactAttached>true</shadedArtifactAttached>-->
                             <artifactSet>
                                 <includes>
@@ -452,4 +464,5 @@
     <!--                            </execution>-->
     <!--                        </executions>-->
     <!--                    </plugin>-->
+
 </project>
