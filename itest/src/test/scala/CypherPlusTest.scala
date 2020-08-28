@@ -91,8 +91,8 @@ class CypherPlusTest extends TestBase {
     println(db.execute("return '沈志宏' ~:jaro/0.7 '志宏 沈' as r").resultAsString())
     println(db.execute("return '沈志宏' ~:jaro/0.8 '志宏 沈' as r").resultAsString())
 
-    Assert.assertTrue(db.execute("return '沈志宏' :: '志宏 沈' as r").next().get("r").asInstanceOf[Double] > 0.7);
-    Assert.assertTrue(db.execute("return '沈志宏' :: '志宏 沈' as r").next().get("r").asInstanceOf[Double] < 0.8);
+    Assert.assertTrue(db.execute("return '沈志宏' ::jaro '志宏 沈' as r").next().get("r").asInstanceOf[Double] > 0.7);
+    Assert.assertTrue(db.execute("return '沈志宏' ::jaro '志宏 沈' as r").next().get("r").asInstanceOf[Double] < 0.8);
     Assert.assertTrue(db.execute("return '沈志宏' ::jaro '志宏 沈' as r").next().get("r").asInstanceOf[Double] > 0.7);
     Assert.assertEquals(true, db.execute("return '沈志宏' ~: '志宏 沈' as r").next().get("r"));
     Assert.assertEquals(true, db.execute("return '沈志宏' ~:jaro/0.7 '志宏 沈' as r").next().get("r"));
@@ -135,11 +135,11 @@ class CypherPlusTest extends TestBase {
     Assert.assertEquals(2976, db.execute(s"return <file://${basedir}/bluejoe1.jpg>->height as x")
       .next().get("x"));
 
-    Assert.assertEquals(true, db.execute(s"return <file://${basedir}/car1.jpg>->plateNumber = '苏E730V7' as r")
-      .next().get("r").asInstanceOf[Boolean]);
+    Assert.assertEquals("苏E730V7", db.execute(s"return <file://${basedir}/car1.jpg>->plateNumber as r")
+      .next().get("r").asInstanceOf[String]);
 
-    Assert.assertEquals(true, db.execute(s"return <file://${basedir}/test.wav>->message = '中华人民共和国' as r")
-      .next().get("r").asInstanceOf[Boolean]);
+    Assert.assertEquals("北京欢迎你", db.execute(s"return <file://${basedir}/test.wav>->message as r")
+      .next().get("r").asInstanceOf[String]);
 
     tx.success();
     tx.close();
