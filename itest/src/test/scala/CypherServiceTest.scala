@@ -17,7 +17,7 @@ class CypherServiceTest extends TestBase {
     });
 
     println(node.asMap());
-    Assert.assertEquals(5, node.size());
+    Assert.assertEquals(6, node.size());
     Assert.assertEquals("bob", name);
     Assert.assertEquals(30, age);
     Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))), bytes);
@@ -95,6 +95,15 @@ class CypherServiceTest extends TestBase {
     client.querySingleObject(s"CREATE (n {name:'lzxddz', photo:<https://www.baidu.com/img/flexible/logo/pc/result.png>}) return n", (result: Record) => {
       val onlineBlob = result.get(0).asNode().get("photo").asBlob
       Assert.assertArrayEquals(IOUtils.toByteArray(new URL("https://www.baidu.com/img/flexible/logo/pc/result.png").openConnection().getInputStream),
+        onlineBlob.offerStream {
+          IOUtils.toByteArray(_)
+        })
+    })
+
+    //http inline blob
+    client.querySingleObject(s"CREATE (n {name:'gaolianxin', photo1:<file://./testinput/ai/bluejoe1.jpg>, photo2:<file://./testinput/ai/bluejoe1.jpg>, photo3:<file://./testinput/ai/bluejoe1.jpg>, photo4:<file://./testinput/ai/bluejoe1.jpg>}) return n", (result: Record) => {
+      val onlineBlob = result.get(0).asNode().get("photo1").asBlob
+      Assert.assertArrayEquals(IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/bluejoe1.jpg"))),
         onlineBlob.offerStream {
           IOUtils.toByteArray(_)
         })
