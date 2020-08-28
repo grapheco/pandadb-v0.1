@@ -138,7 +138,7 @@ class CypherPlusTest extends TestBase {
     Assert.assertEquals("苏E730V7", db.execute(s"return <file://${basedir}/car1.jpg>->plateNumber as r")
       .next().get("r").asInstanceOf[String]);
 
-    Assert.assertEquals("北京欢迎你", db.execute(s"return <file://${basedir}/test.wav>->message as r")
+    Assert.assertEquals("北京欢迎你", db.execute(s"return <file://${basedir}/test.wav>->content as r")
       .next().get("r").asInstanceOf[String]);
 
     tx.success();
