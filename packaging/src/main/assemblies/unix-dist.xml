@@ -36,6 +36,45 @@
             <outputDirectory>logs</outputDirectory>
             <directoryMode>0755</directoryMode>
             <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>**/.keep</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/distribution/data</directory>
+            <outputDirectory>data</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>**/.keep</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/distribution/import</directory>
+            <outputDirectory>import</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>**/.keep</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/distribution/plugins</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>**/.keep</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/distribution/run</directory>
+            <outputDirectory>run</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <excludes>
+                <exclude>**/.keep</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/unix/lib</directory>
