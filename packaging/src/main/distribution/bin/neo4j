@@ -500,7 +500,8 @@ setup_java () {
 
 main() {
   setup_environment
-  NEO4J_HOME=$(dirname $(pwd))
+  script_dir=$(cd $(dirname $0);pwd)
+  NEO4J_HOME=$(dirname $script_dir)
   NEO4J_CONF=$NEO4J_HOME/conf
   NEO4J_LIB=$NEO4J_HOME/lib
   NEO4J_LOGS=$NEO4J_HOME/logs

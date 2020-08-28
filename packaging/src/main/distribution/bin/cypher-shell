@@ -70,7 +70,9 @@ build_classpath() {
   APP_HOME="$(cd "$(dirname "$0")" && pwd)"
   # First try in sub directory
   JARPATH="$(find "${APP_HOME}" -name "cypher-shell-1.0.0-SNAPSHOT.jar" )"
-  CLASSPATH="../lib/pandadb-dist-0.1.0-SNAPSHOT.jar"
+  script_dir=$(cd $(dirname $0);pwd)
+  dir=$(dirname $script_dir)
+  CLASSPATH="$dir/lib/pandadb-dist-0.1.0-SNAPSHOT.jar"
   MAINCLASS="org.neo4j.shell.Main"
   # Then try installation directory (prefix/bin and prefix/share/cypher-shell/lib)
 }
