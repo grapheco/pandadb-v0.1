@@ -23,7 +23,7 @@
 	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
 # PandaDB v0.1
-Intelligent Graph Database (import from GraiphDB https://github.com/grapheco/graiphdb)
+Intelligent Graph Database (migrated from GraiphDB https://github.com/grapheco/graiphdb)
 
 [![GitHub releases](https://img.shields.io/github/release/grapheco/pandadb-v0.1.svg)](https://github.com/grapheco/pandadb-v0.1/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/grapheco/pandadb-v0.1/total.svg)](https://github.com/grapheco/pandadb-v0.1/releases)
