@@ -1,11 +1,11 @@
 @echo off
-echo batchfile=%0
-echo full=%~f0
+set batchfile=%0
+set full=%~f0
 setlocal
   for %%d in (%~dp0.) do set Directory=%%~fd
-  echo Directory=%Directory%
+  set Directory=%Directory%
   for %%d in (%~dp0..) do set ParentDirectory=%%~fd
-  echo ParentDirectory=%ParentDirectory%
+  set ParentDirectory=%ParentDirectory%
   set class_path=%ParentDirectory%\lib\pandadb-dist-0.1.0-SNAPSHOT.jar
   set MainClass="cn.pandadb.server.PandaServerStarter"
   set config=%ParentDirectory%\conf\neo4j.conf

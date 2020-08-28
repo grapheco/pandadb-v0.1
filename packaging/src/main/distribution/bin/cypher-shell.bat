@@ -69,11 +69,19 @@ set CMD_LINE_ARGS=%$
 @rem Setup the command line
 
 SETLOCAL EnableDelayedExpansion
-set CYPHER_SHELL_JAR="..\lib\pandadb-dist-0.1.0-SNAPSHOT.jar"
+
 set MAIN_CLASS="org.neo4j.shell.Main"
+set batchfile=%0
+set full=%~f0
+setlocal
+  for %%d in (%~dp0.) do set Directory=%%~fd
+  set Directory=%Directory%
+  for %%d in (%~dp0..) do set ParentDirectory=%%~fd
+  set ParentDirectory=%ParentDirectory%
+  set CYPHER_SHELL_JAR=%ParentDirectory%\lib\pandadb-dist-0.1.0-SNAPSHOT.jar
 @rem Execute cypher-shell
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% -cp "%CYPHER_SHELL_JAR%" %MAIN_CLASS%
-
+endlocal
 :end
 @rem End local scope for the variables with windows NT shell
 if "%ERRORLEVEL%"=="0" goto mainEnd
