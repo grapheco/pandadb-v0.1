@@ -462,15 +462,37 @@ do_start() {
 }
 
 do_stop() {
-  if [ ! -f "$NEO4J_PIDFILE" ] || ! kill -0 "$(cat "$NEO4J_PIDFILE")"; then
-		echo "Neo4j is not running"
-	else
-		echo "Stopping Neo4j"
-		PID="$(cat "$NEO4J_PIDFILE")"
-		kill -9 $PID
-		rm "$NEO4J_PIDFILE"
-		echo "Neo4j stopped"
-	fi
+   check_status
+
+  if [[ ! "${NEO4J_PID:-}" ]] ; then
+    echo "Neo4j not running"
+    [ -e "${NEO4J_PIDFILE}" ] && rm "${NEO4J_PIDFILE}"
+    return 0
+  else
+    echo -n "Stopping Neo4j."
+    end="$((SECONDS+SHUTDOWN_TIMEOUT))"
+    while true; do
+      check_status
+
+      if [[ ! "${NEO4J_PID:-}" ]]; then
+        echo " stopped"
+        [ -e "${NEO4J_PIDFILE}" ] && rm "${NEO4J_PIDFILE}"
+        return 0
+      fi
+
+      kill "${NEO4J_PID}" 2>/dev/null || true
+
+      if [[ "${SECONDS}" -ge "${end}" ]]; then
+        echo " failed to stop"
+        echo "Neo4j (pid ${NEO4J_PID}) took more than ${SHUTDOWN_TIMEOUT} seconds to stop."
+        echo "Please see ${CONSOLE_LOG} for details."
+        return 1
+      fi
+
+      echo -n "."
+      sleep 1
+    done
+  fi
 }
 
 do_status() {
