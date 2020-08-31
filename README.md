@@ -202,7 +202,7 @@ return <http://s12.sinaimg.cn/mw690/005AE7Quzy7rL8kA4Nt6b&690> ~:0.5 <http://s15
 ```
 
 ##  4. <a name='developersmanual'></a>developers' manual
-###  4.1. <a name='connectingremotePandaDB'></a>connecting remote PandaDB
+###  4.1. <a name='connectingremotePandaDB'></a>connecting an remote PandaDB
 
 import `pandadb:connector` dependency first:
 ```
@@ -255,7 +255,7 @@ A simple example:
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-###  4.2. <a name='usinganembeddedGraphDB'></a>using an embedded GraphDB
+###  4.2. <a name='usinganembeddedGraphDB'></a>using an embedded PandaDB
 
 import `pandadb:database` dependency first:
 
