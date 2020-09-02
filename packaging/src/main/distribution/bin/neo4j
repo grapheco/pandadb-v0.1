@@ -222,7 +222,7 @@ _setup_calculated_paths() {
   if [[ -z "${NEO4J_HOME:-}" ]]; then
     NEO4J_HOME="$(cd "$(dirname "$0")"/.. && pwd)"
   fi
-  : "${NEO4J_CONF:="../conf"}"
+  : "${NEO4J_CONF:="${NEO4J_HOME}/conf"}"
 }
 
 _read_config() {
@@ -249,16 +249,15 @@ _read_config() {
       fi
     fi
   }
-
   if [[ -f "${NEO4J_CONF}/neo4j-wrapper.conf" ]]; then
     cat >&2 <<EOF
 WARNING: neo4j-wrapper.conf is deprecated and support for it will be removed in a future
          version of Neo4j; please move all your settings to neo4j.conf
 EOF
   fi
-
+  
   for file in "neo4j.conf"; do
-    path="../conf/F:\pandadb-v0.1\packaging\pom.xml"
+    path="${NEO4J_CONF}/neo4j.conf"
     if [ -e "${path}" ]; then
       while read line; do
         parse_line "${line}"
@@ -531,7 +530,7 @@ main() {
   NEO4J_DATA=$NEO4J_HOME/data
   NEO4J_PLUGINS=$NEO4J_HOME/plugins
   NEO4J_CERTS=$NEO4J_HOME/certificates
-  readonly NEO4J_HOME NEO4J_CONF NEO4J_LIB NEO4J_LOGS NEO4J_RUN NEO4J_DATA NEO4J_PLUGINS NEO4J_CERTS
+  readonly NEO4J_HOME NEO4J_LIB NEO4J_LOGS NEO4J_RUN NEO4J_DATA NEO4J_PLUGINS NEO4J_CERTS
   CONSOLE_LOG="${NEO4J_LOGS}/neo4j.log"
   NEO4J_PIDFILE="${NEO4J_RUN}/neo4j.pid"
   readonly CONSOLE_LOG NEO4J_PIDFILE
