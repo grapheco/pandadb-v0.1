@@ -13,9 +13,11 @@
 	* 3.2. [property extration](#propertyextration)
 	* 3.3. [semantic comparison](#semanticcomparison)
 * 4. [developers' manual](#developersmanual)
-	* 4.1. [connecting remote PandaDB](#connectingremotePandaDB)
-	* 4.2. [using an embedded GraphDB](#usinganembeddedGraphDB)
-* 5. [Licensing](#Licensing)
+	* 4.1. [connecting an remote PandaDB](#connectinganremotePandaDB)
+	* 4.2. [using an embedded PandaDB](#usinganembeddedPandaDB)
+	* 4.3. [ 4.3 configuration](#4.3configuration)
+* 5. [5. TODO](#TODO)
+* 6. [Licensing](#Licensing)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -118,7 +120,11 @@ Also, you may visit `http://localhost:7474`  to browse graph data in `neo4j-brow
 ###  2.4. <a name='STEP4.queryingonPandaDB'></a>STEP 4. querying on PandaDB
 
 in `neo4j-browser`, users may input `Cypher` commands to query on PandaDB.
+```
+return <https://bluejoe2008.github.io/p4.png>
 
+```
+or creating a new node:
 ```
 create (bluejoe:Person {name: 'bluejoe', mail:'bluejoe2008@gmail.com', photo: <https://bluejoe2008.github.io/p4.png>}) return bluejoe
 
@@ -142,13 +148,14 @@ PandaDB enhances `Cypher` grammar, naming CypherPlus. CypherPlus allows writing 
 
 Available schema includes: file, http, https, ftp, ftps, base64.
 
-|schema|path|example|
-|file|path of local file on pandadb server|`file://etc/profile`|
-|http|path of file on remote web server|`http://s12.sinaimg.cn/mw690/005AE7Quzy7rL8kA4Nt6b&690`|
-|https|path of file on remote web server|`https://bluejoe2008.github.io/bluejoe3.png`|
-|ftp|path of file on remote FTP server||
-|ftps|path of file on remote FTP server||
-|base64|path should be a BASE64 encoding string|`base64://dGhpcyBpcyBhbiBleGFtcGxl`, represents a string with content `this is an example`|
+schema|path|example
+-|-|-
+file|path of local file on pandadb server|`file://etc/profile`
+http|path of file on remote web server|`http://s12.sinaimg.cn/mw690/005AE7Quzy7rL8kA4Nt6b&690`
+https|path of file on remote web server|`https://bluejoe2008.github.io/bluejoe3.png`
+ftp|path of file on remote FTP server|
+ftps|path of file on remote FTP server|
+base64|path should be a BASE64 encoding string|`base64://dGhpcyBpcyBhbiBleGFtcGxl`, represents a string with content `this is an example`
 
 Next code illustrates how to use blob in Cypher query:
 ```
@@ -205,7 +212,7 @@ return <http://s12.sinaimg.cn/mw690/005AE7Quzy7rL8kA4Nt6b&690> ~:0.5 <http://s15
 ```
 
 ##  4. <a name='developersmanual'></a>developers' manual
-###  4.1. <a name='connectingremotePandaDB'></a>connecting an remote PandaDB
+###  4.1. <a name='connectinganremotePandaDB'></a>connecting an remote PandaDB
 
 import `pandadb:connector` dependency first:
 ```
@@ -258,7 +265,7 @@ A simple example:
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-###  4.2. <a name='usinganembeddedGraphDB'></a>using an embedded PandaDB
+###  4.2. <a name='usinganembeddedPandaDB'></a>using an embedded PandaDB
 
 import `pandadb:database` dependency first:
 
@@ -311,7 +318,9 @@ If you are used to `CypherService`, you may try the method `LocalGraphService.co
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-## 5. TODO
+###  4.3. <a name='4.3configuration'></a> 4.3 configuration
+
+##  5. <a name='TODO'></a>5. TODO
 
 * batch import (spi: org.neo4j.unsafe.impl.batchimport.BatchImporterFactory)
 * blob group
