@@ -140,12 +140,15 @@ PandaDB enhances `Cypher` grammar, naming CypherPlus. CypherPlus allows writing 
 `BlobLiteral` is defined in Cypher grammar in form of:
 `<schema://path>`
 
-Following schema is ok:
-* file: local files on server
-* http
-* https
-* ftp
-* base64: path should be a BASE64 encoding string, for example: \<base64://dGhpcyBpcyBhbiBleGFtcGxl\> represents a string with content `this is an example`
+Available schema includes: file, http, https, ftp, ftps, base64.
+
+|schema|path|example|
+|file|path of local file on pandadb server|`file://etc/profile`|
+|http|path of file on remote web server|`http://s12.sinaimg.cn/mw690/005AE7Quzy7rL8kA4Nt6b&690`|
+|https|path of file on remote web server|`https://bluejoe2008.github.io/bluejoe3.png`|
+|ftp|path of file on remote FTP server||
+|ftps|path of file on remote FTP server||
+|base64|path should be a BASE64 encoding string|`base64://dGhpcyBpcyBhbiBleGFtcGxl`, represents a string with content `this is an example`|
 
 Next code illustrates how to use blob in Cypher query:
 ```
