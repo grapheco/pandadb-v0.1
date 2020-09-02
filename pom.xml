@@ -169,6 +169,10 @@
             <groupId>org.grapheco</groupId>
             <artifactId>graiph-blob-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.grapheco</groupId>
+            <artifactId>graiph-blob-impl</artifactId>
+        </dependency>
     </dependencies>
 
     <distributionManagement>
@@ -193,15 +197,12 @@
     <build>
         <plugins>
             <plugin>
-                <!--mvn clean scala:compile compile install -DskipTests-->
-                <!--mvn clean scala:compile compile-->
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>3.2.0</version>
-                <!-- This is needed to mix scala and java code in the same module -->
                 <executions>
                     <execution>
-                        <id>scala-compile</id>
+                        <id>scala-compile-first</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>add-source</goal>
@@ -216,10 +217,8 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <scalaVersion>2.11.12</scalaVersion>
-                </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -230,6 +229,7 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -242,6 +242,15 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
             </plugin>
         </plugins>
     </build>
