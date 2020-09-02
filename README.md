@@ -15,8 +15,8 @@
 * 4. [developers' manual](#developersmanual)
 	* 4.1. [connecting an remote PandaDB](#connectinganremotePandaDB)
 	* 4.2. [using an embedded PandaDB](#usinganembeddedPandaDB)
-	* 4.3. [ 4.3 configuration](#4.3configuration)
-* 5. [5. TODO](#TODO)
+	* 4.3. [configuration](#configuration)
+* 5. [TODO](#TODO)
 * 6. [Licensing](#Licensing)
 
 <!-- vscode-markdown-toc-config
@@ -318,9 +318,9 @@ If you are used to `CypherService`, you may try the method `LocalGraphService.co
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-###  4.3. <a name='4.3configuration'></a> 4.3 configuration
+###  4.3. <a name='configuration'></a> configuration
 
-##  5. <a name='TODO'></a>5. TODO
+##  5. <a name='TODO'></a>TODO
 
 * batch import (spi: org.neo4j.unsafe.impl.batchimport.BatchImporterFactory)
 * blob group
