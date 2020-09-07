@@ -164,16 +164,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>org.grapheco</groupId>
-            <artifactId>graiph-blob-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.grapheco</groupId>
-            <artifactId>graiph-blob-impl</artifactId>
-        </dependency>
-    </dependencies>
 
     <distributionManagement>
         <snapshotRepository>
@@ -252,6 +242,7 @@
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
+            <!--Mark the directory function in pom.xml-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
