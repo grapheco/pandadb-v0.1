@@ -12,7 +12,7 @@ import org.neo4j.driver.Record
 class CypherServiceTest extends TestBase {
   private def testCypher(client: CypherService): Unit = {
     //a non-blob
-    val (node, name, age, bytes) = client.querySingleObject("match (n) where n.name='bob' return n, n.name, n.age, n.bytes", (result: Record) => {
+    val (node, name, age, bytes) = client.querySingleObject("match (n) where n.name='bob' return n, n.name, n.age, n.bytes;", (result: Record) => {
       (result.get("n").asNode(), result.get("n.name").asString(), result.get("n.age").asInt(), result.get("n.bytes").asByteArray())
     });
 
@@ -24,7 +24,7 @@ class CypherServiceTest extends TestBase {
     Assert.assertEquals(41745, node.get("photo").asBlob().length);
     Assert.assertEquals("image/png", node.get("photo").asBlob().mimeType.text);
 
-    val basedir = new File("./testinput").getAbsoluteFile.getCanonicalPath
+    val basedir = FilePathUtils.transSplitSymbol(new File("./testinput").getAbsoluteFile.getCanonicalPath)
 
     //blob
     val blob0 = client.querySingleObject("return Blob.empty()", (result: Record) => {
