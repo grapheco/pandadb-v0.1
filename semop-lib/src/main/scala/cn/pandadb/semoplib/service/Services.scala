@@ -5,6 +5,7 @@ import java.io.InputStream
 import cn.pandadb.semop.PropertyValueComparator
 import org.neo4j.blob.util.ConfigUtils._
 import org.neo4j.blob.util.Configuration
+import org.neo4j.values.AnyValue
 
 import scala.collection.immutable.Map
 import scala.util.parsing.json.JSON
@@ -14,6 +15,7 @@ class Services(private val _aipmHttpHostUrl: String) {
   val servicesPath = Map(
     "FaceSim" -> "service/face/similarity/",
     "FaceInPhoto" -> "service/face/in_photo/",
+    "FaceFeature" -> "service/face/feature/",
     "PlateNumber" -> "service/plate/",
     "ClassifyAnimal" -> "service/classify/dogorcat/",
     "MandarinASR" -> "service/asr/",
@@ -30,10 +32,10 @@ class Services(private val _aipmHttpHostUrl: String) {
     }
   }
 
+  //should get id?
   //TODO: extract a common function with user-defined input/output parameters
   def computeFaceSimilarity(img1InputStream: InputStream, img2InputStream: InputStream): List[List[Double]] = {
     val serviceUrl = getServiceUrl("FaceSim")
-
     val contents = Map("image1" -> img1InputStream, "image2" -> img2InputStream)
 
     val res = WebUtils.doPost(serviceUrl, inStreamContents = contents)
@@ -45,7 +47,28 @@ class Services(private val _aipmHttpHostUrl: String) {
     else {
       null
     }
+  }
+  def extractFaceFeatures(img1InputStream: InputStream): List[List[Double]]= {
+    val serviceUrl = getServiceUrl("FaceFeature")
+    val contents = Map("image" -> img1InputStream)
 
+    val res = WebUtils.doPost(serviceUrl, inStreamContents = contents)
+    val json: Option[Any] = JSON.parseFull(res)
+    val map: Map[String, Any] = json.get.asInstanceOf[Map[String, Any]]
+    if (map("res").asInstanceOf[Boolean]) {
+      if(map("value").asInstanceOf[List[List[Double]]].length == 0){
+//        throw new Exception("no face detected.")
+
+          val arr = new Array[Double](128)
+          List(arr.toList)
+
+      } else {
+        map("value").asInstanceOf[List[List[Double]]]
+      }
+    }
+    else {
+      null
+    }
   }
 
 
