@@ -9,8 +9,8 @@ import org.neo4j.blob.impl.BlobFactory
 class TestBase {
   @Before
   def setup(): Unit = {
-    setupNewDatabase()
-//    setupImageDatabase()
+//    setupNewDatabase()
+    setupImageDatabase()
   }
 
   private def setupNewDatabase(): Unit = {
@@ -48,7 +48,7 @@ class TestBase {
   }
 
   private def setupImageDatabase(): Unit ={
-    FileUtils.deleteDirectory(new File("./testoutput/testImagedb"));
+    FileUtils.deleteDirectory(new File("./testoutput/testdb"));
     if (true) {
       val db = openDatabase();
       val tx = db.beginTx();
@@ -62,7 +62,6 @@ class TestBase {
       tx.success()
       tx.close()
       db.shutdown()
-
     }
   }
 
@@ -70,6 +69,10 @@ class TestBase {
     dir.listFiles.filter(_.isFile) ++
       dir.listFiles.filter(_.isDirectory).flatMap(_getFiles1)
   }
+
+  def openImageDatabase() =
+    PandaDB.openDatabase(new File("./testoutput/testdb/data/databases/image/graph.db"),
+      new File("./testinput/neo4j.conf"));
 
   def openDatabase() =
     PandaDB.openDatabase(new File("./testoutput/testdb/data/databases/graph.db"),

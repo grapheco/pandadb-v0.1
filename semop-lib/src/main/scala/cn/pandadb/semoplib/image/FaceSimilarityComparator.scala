@@ -2,7 +2,7 @@ package cn.pandadb.semoplib.image
 
 import cn.pandadb.semoplib.service.ServiceInitializer
 import cn.pandadb.semop.{DomainType, SemanticComparator, ValueSetComparator}
-import org.neo4j.blob.{Blob, BlobId, ManagedBlob}
+import org.neo4j.blob.{Blob, BlobId, ManagedBlob, URLInputStreamSource}
 
 import scala.collection.mutable
 import scala.math
@@ -10,6 +10,7 @@ import scala.math
 @SemanticComparator(name = "face", domains = Array(DomainType.BlobImage, DomainType.BlobImage), threshold = 0.6)
 class FaceSimilarityComparator extends ValueSetComparator with ServiceInitializer {
 
+  // add a switch, cache mode or no-cache mode.
   // cache features in a map, for fast development only, optimize in the future.
   // TODO: ask bluejoe how to set the key
   private var _featuresMap: mutable.HashMap[String, List[List[Double]]] = new mutable.HashMap[String, List[List[Double]]]()
@@ -29,32 +30,38 @@ class FaceSimilarityComparator extends ValueSetComparator with ServiceInitialize
 
   private def _isFeatureCached(blob: Blob): Boolean = {
 
-    if(blob.isInstanceOf[ManagedBlob]){
-      val flag = _featuresMap.contains(blob.asInstanceOf[ManagedBlob].id.asLiteralString())
-      flag
-    } else {
-      false
+    blob match {
+      case blob: ManagedBlob => _featuresMap.contains(blob.asInstanceOf[ManagedBlob].id.asLiteralString())
+      case blob: Blob => _featuresMap.contains(blob.streamSource.asInstanceOf[URLInputStreamSource].url)
     }
   }
 
   private def _getFeaturesOfBlob(blob: Blob): List[List[Double]] = {
     if (_isFeatureCached(blob)) {
-      _getFeatureFromCache(blob.asInstanceOf[ManagedBlob])
+      _getFeatureFromCache(blob)
     } else {
       blob.offerStream(is => {
         val features = service.extractFaceFeatures(is)
-//        val nowLiteralValue = blob.asInstanceOf[ManagedBlob].id.asLiteralString()
-        // cache the feature if it's ManagedBlob
-        if(blob.isInstanceOf[ManagedBlob]) {
-          _featuresMap.put(blob.asInstanceOf[ManagedBlob].id.asLiteralString(), features)
+
+        blob match {
+          case blob:  ManagedBlob => {
+            _featuresMap.put(blob.asInstanceOf[ManagedBlob].id.asLiteralString(), features)
+          }
+          case blob: Blob => {
+            val key = blob.streamSource.asInstanceOf[URLInputStreamSource].url
+            _featuresMap.put(key, features)
+          }
         }
         features
       })
     }
   }
 
-  private def _getFeatureFromCache(blob: ManagedBlob): List[List[Double]] = {
-    _featuresMap.get(blob.id.asLiteralString()).get
+  private def _getFeatureFromCache(blob: Blob): List[List[Double]] = {
+    blob match {
+      case blob: ManagedBlob => _featuresMap.get(blob.id.asLiteralString()).get
+      case blob: Blob => _featuresMap.get(blob.streamSource.asInstanceOf[URLInputStreamSource].url).get
+    }
   }
 
   def _featureSimilarity(featureList1: List[Double], featureList2: List[Double]): Double = {

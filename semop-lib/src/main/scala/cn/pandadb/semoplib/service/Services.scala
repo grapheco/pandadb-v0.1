@@ -32,7 +32,6 @@ class Services(private val _aipmHttpHostUrl: String) {
     }
   }
 
-  //should get id?
   //TODO: extract a common function with user-defined input/output parameters
   def computeFaceSimilarity(img1InputStream: InputStream, img2InputStream: InputStream): List[List[Double]] = {
     val serviceUrl = getServiceUrl("FaceSim")
@@ -48,6 +47,7 @@ class Services(private val _aipmHttpHostUrl: String) {
       null
     }
   }
+
   def extractFaceFeatures(img1InputStream: InputStream): List[List[Double]]= {
     val serviceUrl = getServiceUrl("FaceFeature")
     val contents = Map("image" -> img1InputStream)
@@ -58,7 +58,6 @@ class Services(private val _aipmHttpHostUrl: String) {
     if (map("res").asInstanceOf[Boolean]) {
       if(map("value").asInstanceOf[List[List[Double]]].length == 0){
 //        throw new Exception("no face detected.")
-
           val arr = new Array[Double](128)
           List(arr.toList)
 
