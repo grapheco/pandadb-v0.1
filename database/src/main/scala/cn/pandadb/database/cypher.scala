@@ -447,7 +447,13 @@ class InvalidSemanticOperatorException(compared: AnyValue) extends RuntimeExcept
 
 case class BlobLiteralCommand(url: BlobURL) extends CommandExpression {
   def apply(ctx: ExecutionContext, state: QueryState): AnyValue = {
-    BlobValue(url.createBlob());
+    if(_isCached(url.asCanonicalString)){
+      BlobValue(BlobFactory.memBlobCache(url.asCanonicalString))
+    } else {
+      val blob = url.createBlob()
+      BlobFactory.memBlobCache.put(url.asCanonicalString, blob)
+      BlobValue(blob)
+    }
   }
 
   override def rewrite(f: (CommandExpression) => CommandExpression): CommandExpression = f(this)
@@ -455,4 +461,9 @@ case class BlobLiteralCommand(url: BlobURL) extends CommandExpression {
   override def arguments: Seq[CommandExpression] = Nil
 
   override def symbolTableDependencies: Set[String] = Set()
+
+  //below are thr funcs to support temp blob cache in memory
+  private def _isCached(url: String): Boolean = {
+    BlobFactory.memBlobCache.contains(url)
+  }
 }

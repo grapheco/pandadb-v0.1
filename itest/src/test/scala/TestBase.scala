@@ -9,8 +9,8 @@ import org.neo4j.blob.impl.BlobFactory
 class TestBase {
   @Before
   def setup(): Unit = {
-//    setupNewDatabase()
-    setupImageDatabase()
+    setupNewDatabase()
+//    setupImageDatabase()
   }
 
   private def setupNewDatabase(): Unit = {
@@ -26,8 +26,8 @@ class TestBase {
       node1.setProperty("age", 30);
       //property as a byte array
       node1.setProperty("bytes", IOUtils.toByteArray(new FileInputStream(new File("./testinput/ai/test.png"))));
-      node1.setProperty("facephoto1", BlobFactory.fromFile(new File("./testinput/ai/face1.jpg")))
-      node1.setProperty("facephoto2", BlobFactory.fromFile(new File("./testinput/ai/face2.jpg")))
+//      node1.setProperty("facephoto1", BlobFactory.fromFile(new File("./testinput/ai/face1.jpg")))
+//      node1.setProperty("facephoto2", BlobFactory.fromFile(new File("./testinput/ai/face2.jpg")))
 
       //with a blob property
       node1.setProperty("photo", BlobFactory.fromFile(new File("./testinput/ai/test.png")));
