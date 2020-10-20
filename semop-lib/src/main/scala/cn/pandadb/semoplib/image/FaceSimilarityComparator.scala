@@ -31,7 +31,7 @@ class FaceSimilarityComparator extends ValueSetComparator with ServiceInitialize
 
     blob match {
       case blob: ManagedBlob => _featuresMap.contains(blob.asInstanceOf[ManagedBlob].id.asLiteralString())
-      case blob: Blob => _featuresMap.contains(blob.streamSource.asInstanceOf[URLInputStreamSource].url)
+      case blob: Blob => _featuresMap.contains(Blob.getMd5HexDigest(blob))
     }
   }
 
@@ -47,7 +47,7 @@ class FaceSimilarityComparator extends ValueSetComparator with ServiceInitialize
             _featuresMap.put(blob.asInstanceOf[ManagedBlob].id.asLiteralString(), features)
           }
           case blob: Blob => {
-            val key = blob.streamSource.asInstanceOf[URLInputStreamSource].url
+            val key = Blob.getMd5HexDigest(blob)
             _featuresMap.put(key, features)
           }
         }
@@ -59,7 +59,7 @@ class FaceSimilarityComparator extends ValueSetComparator with ServiceInitialize
   private def _getFeatureFromCache(blob: Blob): List[List[Double]] = {
     blob match {
       case blob: ManagedBlob => _featuresMap.get(blob.id.asLiteralString()).get
-      case blob: Blob => _featuresMap.get(blob.streamSource.asInstanceOf[URLInputStreamSource].url).get
+      case blob: Blob => _featuresMap.get(Blob.getMd5HexDigest(blob)).get
     }
   }
 
@@ -73,24 +73,5 @@ class FaceSimilarityComparator extends ValueSetComparator with ServiceInitialize
     val sim = 1 - norm
     sim
   }
-//  def _featureSimilarity(featureList1: List[Double], featureList2: List[Double]): Double = {
-//
-//    if(featureList1.length != featureList2.length) {
-//      throw new Exception("Face feature's length not equal.")
-//    }
-//
-//    val lenFeature1 = math.sqrt(featureList1.map(math.pow(_,2)).sum)
-//    val lenFeature2 = math.sqrt(featureList2.map(math.pow(_,2)).sum)
-//    if(lenFeature1==0 || lenFeature2==0){
-//      0
-//    } else {
-//      val innerProduct = featureList1.zip(featureList2).map(pair => pair._1 * pair._2).sum
-//
-//      val cosine = innerProduct/lenFeature1/lenFeature2
-//
-//      cosine
-//    }
-//
-//  }
 
 }
