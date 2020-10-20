@@ -1,11 +1,11 @@
 package cn.pandadb.semoplib.image
 
-import cn.pandadb.semoplib.service.ServiceInitializer
 import cn.pandadb.semop.{DomainType, SemanticComparator, ValueSetComparator}
-import org.neo4j.blob.{Blob, BlobId, URLInputStreamSource, ManagedBlob}
+import cn.pandadb.semoplib.service.ServiceInitializer
+import cn.pandadb.util.BlobDigester
+import org.neo4j.blob.{Blob, ManagedBlob}
 
 import scala.collection.mutable
-import scala.math
 
 @SemanticComparator(name = "face", domains = Array(DomainType.BlobImage, DomainType.BlobImage), threshold = 0.6)
 class FaceSimilarityComparator extends ValueSetComparator with ServiceInitializer {
@@ -31,7 +31,7 @@ class FaceSimilarityComparator extends ValueSetComparator with ServiceInitialize
 
     blob match {
       case blob: ManagedBlob => _featuresMap.contains(blob.asInstanceOf[ManagedBlob].id.asLiteralString())
-      case blob: Blob => _featuresMap.contains(Blob.getMd5HexDigest(blob))
+      case blob: Blob => _featuresMap.contains(BlobDigester.getMd5HexDigest(blob))
     }
   }
 
@@ -47,7 +47,7 @@ class FaceSimilarityComparator extends ValueSetComparator with ServiceInitialize
             _featuresMap.put(blob.asInstanceOf[ManagedBlob].id.asLiteralString(), features)
           }
           case blob: Blob => {
-            val key = Blob.getMd5HexDigest(blob)
+            val key = BlobDigester.getMd5HexDigest(blob)
             _featuresMap.put(key, features)
           }
         }
@@ -59,7 +59,7 @@ class FaceSimilarityComparator extends ValueSetComparator with ServiceInitialize
   private def _getFeatureFromCache(blob: Blob): List[List[Double]] = {
     blob match {
       case blob: ManagedBlob => _featuresMap.get(blob.id.asLiteralString()).get
-      case blob: Blob => _featuresMap.get(Blob.getMd5HexDigest(blob)).get
+      case blob: Blob => _featuresMap.get(BlobDigester.getMd5HexDigest(blob)).get
     }
   }
 

@@ -9,8 +9,8 @@ import org.neo4j.blob.impl.BlobFactory
 class TestBase {
   @Before
   def setup(): Unit = {
-    setupNewDatabase()
-//    setupImageDatabase()
+//    setupNewDatabase()
+    setupImageDatabase()
   }
 
   private def setupNewDatabase(): Unit = {
