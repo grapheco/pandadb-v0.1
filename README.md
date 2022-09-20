@@ -107,6 +107,10 @@ PandaDB Server (ver 0.1.0.20200801)
 2020-08-08 04:20:54.926+0000 INFO  Started.
 2020-08-08 04:20:56.224+0000 INFO  Remote interface available at http://localhost:7474/
 ```
+For details about starting a PandaDB cluster, please visit [Start Instruction](docs/start_instruction.md).
+
+Please start AIPM-Web server if you want to use the functions about AI algorithm, the details could be found [AIPM-Web Instructions](docs/aipm.md).
+
 
 ###  2.3. <a name='STEP3.connectremotePandaDB'></a>STEP 3. connect remote PandaDB
 
@@ -318,8 +322,40 @@ If you are used to `CypherService`, you may try the method `LocalGraphService.co
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-[//]: # (###  4.3. <a name='configuration'></a> configuration)
+###  4.3. <a name='configuration'></a> configuration
+The configuration file specifies the addresses, listening ports, and other necessary configuration information of each node, BlobValueManager, and AIPM in the distributed environment.
+The following is the configuration information for configuring a PandaDB cluster. The cluster consists of three nodes. The IP address is replaced by hostname.
 
+```aidl
+cn.pandadb.jraft.enabled=false
+cn.pandadb.jraft.server.id=localhost:8081
+cn.pandadb.jraft.server.group.id=panda
+cn.pandadb.jraft.server.snapshot.enable=true
+cn.pandadb.jraft.server.snapshot.interval.seconds=10
+cn.pandadb.jraft.server.peers=host1:8081,host2:8082,host3:8083
+
+dbms.security.auth_enabled=false
+dbms.connector.bolt.listen_address=:7610
+dbms.connector.http.listen_address=:7410
+dbms.connector.https.listen_address=:7510
+
+costore.factory=cn.pandadb.costore.InElasticSearchPropertyNodeStoreFactory
+costore.enable=false
+costore.es.host=es
+costore.es.port=9200
+costore.es.schema=http
+costore.es.scroll.size=1000
+costore.es.scroll.time.minutes=10
+costore.es.index=test-costore
+costore.es.type=nodes
+
+# replace <aipm-url> with actual AIPM URL
+aipm.http.host.url=<aipm-url>
+blob.storage=org.neo4j.kernel.impl.blob.HBaseBlobValueStorage
+blob.storage.hbase.zookeeper.quorum=http://hostname:2181
+blob.storage.hbase.auto_create_table=true
+blob.storage.hbase.table=PANDADB_BLOB
+```
 
 
 ##  5. <a name='Licensing'></a>Licensing
@@ -333,4 +369,4 @@ We provide multiple channels to connect you to the community of the PandaDB deve
 * Mail list
 
 ## 7. Contributing
-Please review the [Contributing Guide](docs/conduct.md) for information on how to get started contributing to the project.
+Please review the [Contributing Guide](docs/conduct.md) and [CodeSpec](docs/codespec.md) for information on how to get started contributing to the project.
