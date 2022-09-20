@@ -13,9 +13,8 @@
 	* 3.2. [property extration](#propertyextration)
 	* 3.3. [semantic comparison](#semanticcomparison)
 * 4. [developers' manual](#developersmanual)
-	* 4.1. [connecting an remote PandaDB](#connectinganremotePandaDB)
+	* 4.1. [connecting to PandaDB server](#connectinganremotePandaDB)
 	* 4.2. [using an embedded PandaDB](#usinganembeddedPandaDB)
-	* 4.3. [configuration](#configuration)
 * 5. [TODO](#TODO)
 * 6. [Licensing](#Licensing)
 
@@ -140,6 +139,7 @@ NOTE: if user/password is required, try default values: `neo4j`/`neo4j`.
 ##  3. <a name='CypherPlus'></a>CypherPlus
 
 PandaDB enhances `Cypher` grammar, naming CypherPlus. CypherPlus allows writing BLOB literals in query commands, also it allows semantic operations on properties, especially BLOB properties.
+For more details about BLOB and relevant functions, please visit the [Blob Introduction](docs/blob.md).
 
 ###  3.1. <a name='BLOBliterals'></a>BLOB literals
 
@@ -212,7 +212,7 @@ return <http://s12.sinaimg.cn/mw690/005AE7Quzy7rL8kA4Nt6b&690> ~:0.5 <http://s15
 ```
 
 ##  4. <a name='developersmanual'></a>developers' manual
-###  4.1. <a name='connectinganremotePandaDB'></a>connecting an remote PandaDB
+###  4.1. <a name='connectinganremotePandaDB'></a>connecting to a PandaDB server
 
 import `pandadb:connector` dependency first:
 ```
@@ -318,12 +318,19 @@ If you are used to `CypherService`, you may try the method `LocalGraphService.co
 
 more example code, see https://github.com/grapheco/pandadb-v0.1/blob/master/itest/src/test/scala/CypherServiceTest.scala
 
-###  4.3. <a name='configuration'></a> configuration
+[//]: # (###  4.3. <a name='configuration'></a> configuration)
 
-##  5. <a name='TODO'></a>TODO
 
-* batch import (spi: org.neo4j.unsafe.impl.batchimport.BatchImporterFactory)
-* blob group
 
-##  6. <a name='Licensing'></a>Licensing
+##  5. <a name='Licensing'></a>Licensing
 PandaDB v0.1 is an open source product licensed under GPLv3.
+
+## 6. Community
+### Get connected
+We provide multiple channels to connect you to the community of the PandaDB developers, users, and the general graph academic researchers:
+
+* Our Slack channel
+* Mail list
+
+## 7. Contributing
+Please review the [Contributing Guide](docs/conduct.md) for information on how to get started contributing to the project.
